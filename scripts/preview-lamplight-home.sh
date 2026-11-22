@@ -8,6 +8,7 @@ install -m644 scripts/lamplight-home.css "$profile/chrome/userContent.css"
 cat > "$profile/user.js" <<'EOF'
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 user_pref("zen.urlbar.replace-newtab", false);
+user_pref("zen.view.use-single-toolbar", false);
 user_pref("browser.newtabpage.enabled", true);
 user_pref("browser.startup.homepage", "about:home");
 user_pref("browser.startup.page", 1);
