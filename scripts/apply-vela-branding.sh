@@ -24,4 +24,26 @@ for size in 512 1024; do
     rsvg-convert -w "$size" -h "$size" scripts/vela.svg -o "$target"
   fi
 done
+# Firefox uses chrome/icons/default for the native GTK window icon.
+for folder in "$brand" engine/browser/branding/official engine/browser/branding/aurora; do
+  test -d "$folder" || continue
+  for file in "$folder"/default*.png "$folder"/content/icon*.png; do
+    test -f "$file" || continue
+    size=$(python3 -c 'import struct,sys; print(struct.unpack(">I",open(sys.argv[1],"rb").read(24)[16:20])[0])' "$file")
+    rsvg-convert -w "$size" -h "$size" scripts/vela.svg -o "$file"
+  done
+done
 (cd engine && python3 ./mach build faster -j2)
+dist=engine/obj-x86_64-pc-linux-gnu/dist/bin
+for file in "$dist"/browser/chrome/icons/default/*.png "$dist"/chrome/icons/default/*.png "$dist"/browser/icons/*.png "$dist"/icons/*.png; do
+  test -f "$file" || continue
+  case "$(basename "$file")" in default*.png|zen*.png|mozicon*.png|firefox*.png)
+    size=$(python3 -c 'import struct,sys; print(struct.unpack(">I",open(sys.argv[1],"rb").read(24)[16:20])[0])' "$file")
+    tmp=$(mktemp)
+    rsvg-convert -w "$size" -h "$size" scripts/vela.svg -o "$tmp"
+    cat "$tmp" > "$file"
+    rm -f "$tmp"
+    printf 'Updated window icon: %s\n' "$file"
+    ;;
+  esac
+done
