@@ -33,3 +33,49 @@
   }
   @keyframes lp-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 }
+
+@-moz-document url("about:newtab"), url("about:home") {
+  body {
+    background: radial-gradient(ellipse at 50% 22%, light-dark(#ffffff,#173e50), transparent 65%), var(--lp-bg) !important;
+  }
+  .search-wrapper .logo-and-wordmark {
+    gap: 16px !important;
+    margin-bottom: 30px !important;
+  }
+  .search-wrapper .logo {
+    width: 80px !important;
+    height: 80px !important;
+    background-size: contain !important;
+  }
+  .search-wrapper .logo-and-wordmark::after {
+    content: "ProairetOS";
+    color: var(--lp-ink);
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -1.2px;
+  }
+  .search-wrapper .wordmark { display: none !important; }
+  .search-wrapper .search-inner-wrapper {
+    width: min(620px, 90%) !important;
+    max-width: 100% !important;
+  }
+  .search-wrapper .search-handoff-button {
+    background: var(--lp-card) !important;
+    color: var(--lp-ink) !important;
+    border-radius: 14px !important;
+    min-height: 56px !important;
+  }
+  .search-wrapper .fake-textbox { color: var(--lp-ink) !important; opacity: .85; }
+  .top-site-outer .tile {
+    border-radius: 18px !important;
+    background: var(--lp-card) !important;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .logo-and-wordmark { animation: lp-arrive 550ms cubic-bezier(.2,.75,.2,1) both; }
+    .top-site-outer { animation: lp-arrive 450ms cubic-bezier(.2,.75,.2,1) both; }
+    .top-site-outer:nth-child(2) { animation-delay: 45ms; }
+    .top-site-outer:nth-child(3) { animation-delay: 90ms; }
+    .top-site-outer:nth-child(4) { animation-delay: 135ms; }
+    .top-site-outer:nth-child(5) { animation-delay: 180ms; }
+  }
+}
