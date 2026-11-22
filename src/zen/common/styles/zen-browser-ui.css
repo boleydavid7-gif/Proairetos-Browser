@@ -452,3 +452,61 @@ body,
     contain: none;
   }
 }
+
+
+/* ProairetOS Lamplight: browser chrome only, preserving private windows. */
+@media (-moz-platform: linux) {
+  :root:not([zen-private-window="true"], [privatebrowsingmode="temporary"], [popup-window]) {
+    --lamplight-base: light-dark(#edf2f5, #0b2636);
+    --lamplight-surface: light-dark(#f9fbfc, #102f40);
+    --lamplight-raised: light-dark(#ffffff, #173c50);
+    --lamplight-text: light-dark(#172e3d, #edf5fa);
+    --lamplight-accent: light-dark(#006d85, #74d4ef);
+    --lamplight-border: light-dark(#cbd9e2, #28495b);
+    --toolbox-textcolor: var(--lamplight-text) !important;
+    --toolbar-color: var(--lamplight-text) !important;
+    --toolbarbutton-border-radius: 8px !important;
+    --arrowpanel-background: var(--lamplight-surface) !important;
+    --arrowpanel-color: var(--lamplight-text) !important;
+    font-family: system-ui, sans-serif;
+
+    & .zen-browser-generic-background::after {
+      background: var(--lamplight-base) !important;
+      opacity: 1 !important;
+    }
+    & .zen-browser-generic-background::before,
+    & .zen-browser-generic-background .zen-browser-grain {
+      opacity: 0 !important;
+    }
+    & #navigator-toolbox {
+      background: var(--lamplight-base) !important;
+      color: var(--lamplight-text) !important;
+    }
+    & #urlbar .urlbar-background {
+      background: var(--lamplight-raised) !important;
+      border-radius: 8px !important;
+      backdrop-filter: none !important;
+    }
+    & #urlbar[focused="true"]:not([suppress-focus-border]) > .urlbar-background {
+      outline: 2px solid var(--lamplight-accent) !important;
+      outline-offset: -2px !important;
+    }
+    & .tabbrowser-tab .tab-background {
+      border-radius: 8px !important;
+    }
+    & .tabbrowser-tab[selected] .tab-background,
+    & .tabbrowser-tab[visuallyselected] .tab-background {
+      background: var(--lamplight-raised) !important;
+      box-shadow: inset 3px 0 var(--lamplight-accent) !important;
+    }
+    & .tabbrowser-tab:not([selected], [visuallyselected]):hover .tab-background {
+      background: var(--lamplight-surface) !important;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      & .tabbrowser-tab .tab-background,
+      & #urlbar .urlbar-background {
+        transition: background-color 150ms ease, box-shadow 150ms ease !important;
+      }
+    }
+  }
+}
