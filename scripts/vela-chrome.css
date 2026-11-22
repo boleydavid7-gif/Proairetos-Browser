@@ -17,3 +17,30 @@
 #vela-native-rail toolbarbutton { min-height:32px; padding-inline:10px; border-radius:8px; color:var(--lamplight-text); }
 #vela-native-rail toolbarbutton:hover { background:var(--lamplight-raised); }
 :root[zen-compact-mode="true"] #vela-native-rail, #navigator-toolbox:not([zen-sidebar-expanded="true"]) #vela-native-rail { display:none; }
+
+:root:not([privatebrowsingmode="temporary"],[popup-window],[zen-compact-mode="true"]) #navigator-toolbox[zen-sidebar-expanded="true"] {
+  --zen-toolbox-min-width:248px !important;
+  --zen-toolbox-padding:12px;
+}
+#navigator-toolbox[zen-sidebar-expanded="true"] #vela-native-rail {
+  margin:8px 4px; padding:12px 2px 4px; gap:4px;
+  border-top:1px solid var(--lamplight-border);
+}
+#vela-native-rail .vela-rail-heading {
+  font-size:20px; font-weight:600; letter-spacing:-.5px;
+  color:var(--lamplight-text); margin:4px 8px 10px;
+}
+#vela-native-rail toolbarbutton {
+  appearance:none; min-height:36px; padding:6px 12px;
+  border-radius:8px; background:transparent; border:0;
+  text-align:start; justify-content:start;
+}
+#vela-native-rail toolbarbutton:hover { background:var(--lamplight-raised); }
+#vela-native-rail toolbarbutton:focus-visible { outline:2px solid var(--lamplight-accent); outline-offset:-2px; }
+#navigator-toolbox[zen-sidebar-expanded="true"] .zen-current-workspace-indicator {
+  background:transparent !important; border:1px solid var(--lamplight-border);
+  min-height:38px; margin-block:8px !important;
+}
+#navigator-toolbox[zen-sidebar-expanded="true"] .tabbrowser-tab:not([zen-essential="true"]) .tab-background { border-radius:8px !important; }
+#navigator-toolbox[zen-sidebar-expanded="true"] #tabbrowser-arrowscrollbox-periphery > toolbarbutton { background:transparent; margin-inline:4px; }
+@media(prefers-reduced-motion:no-preference) { #vela-native-rail toolbarbutton { transition:background-color 160ms ease; } }
