@@ -5,6 +5,7 @@ root="$PWD"
 profile="$root/.lamplight-home-preview"
 mkdir -p "$profile/chrome"
 install -m644 scripts/lamplight-home.css "$profile/chrome/userContent.css"
+install -m644 scripts/vela.svg "$profile/chrome/vela.svg"
 cat > "$profile/user.js" <<'EOF'
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 user_pref("zen.urlbar.replace-newtab", false);
