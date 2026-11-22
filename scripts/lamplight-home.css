@@ -79,3 +79,50 @@
     .top-site-outer:nth-child(5) { animation-delay: 180ms; }
   }
 }
+
+@-moz-document url("about:newtab"), url("about:home") {
+  .logo-and-wordmark-wrapper .logo-and-wordmark {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    margin-block-end: 20px !important;
+  }
+  .logo-and-wordmark-wrapper .logo-and-wordmark .logo {
+    width: 96px !important;
+    height: 96px !important;
+    background-size: contain !important;
+  }
+  .logo-and-wordmark-wrapper .wordmark { display: none !important; }
+  .logo-and-wordmark-wrapper .logo-and-wordmark::after {
+    content: "ProairetOS";
+    color: var(--lp-ink);
+    font-size: 34px;
+    font-weight: 600;
+    letter-spacing: -1.4px;
+  }
+  .search-wrapper .search-inner-wrapper {
+    width: min(680px, 84vw) !important;
+    max-width: 100% !important;
+    height: 58px !important;
+  }
+  content-search-handoff-ui {
+    --content-search-handoff-ui-background-color: var(--lp-card) !important;
+    --content-search-handoff-ui-color: var(--lp-ink) !important;
+    --content-search-handoff-ui-fill: var(--lp-ink) !important;
+    --content-search-handoff-ui-caret-color: var(--lp-ink) !important;
+    --content-search-handoff-ui-border-width: 1px !important;
+    --content-search-handoff-ui-border-radius: 15px !important;
+    --content-search-handoff-ui-unfocused-border-color: var(--lp-border) !important;
+    --content-search-handoff-ui-fakefocus-border-color: var(--lp-accent) !important;
+    --content-search-handoff-ui-fakefocus-box-shadow-inner: color-mix(in srgb,var(--lp-accent) 22%,transparent) !important;
+    --content-search-handoff-ui-fakefocus-box-shadow-outer: transparent !important;
+    border-radius: 15px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .logo-and-wordmark-wrapper { animation: lp-arrive 480ms cubic-bezier(.2,.75,.2,1) both; }
+    content-search-handoff-ui { transition: box-shadow 220ms ease, transform 220ms ease; }
+    content-search-handoff-ui:hover { box-shadow: 0 6px 24px #0002; transform: translateY(-1px); }
+  }
+}
