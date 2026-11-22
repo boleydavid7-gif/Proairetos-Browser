@@ -597,3 +597,46 @@ body,
     }
   }
 }
+
+/* Edge-inspired Lamplight layout, using Zen's native multiple-toolbar mode. */
+@media (-moz-platform: linux) {
+  :root:not([zen-private-window="true"], [privatebrowsingmode="temporary"], [popup-window], [inDOMFullscreen="true"]) {
+    & #navigator-toolbox[zen-sidebar-expanded="true"] {
+      --zen-toolbox-min-width: 248px !important;
+    }
+    & #navigator-toolbox[zen-sidebar-expanded="true"] .tabbrowser-tab:not([zen-essential="true"], [zen-glance-tab]) .tab-background {
+      border-radius: 9px !important;
+      margin-inline: 3px;
+    }
+    & #navigator-toolbox[zen-sidebar-expanded="true"] .tabbrowser-tab[visuallyselected] .tab-background {
+      border: 1px solid var(--lamplight-border);
+    }
+    & #navigator-toolbox[zen-sidebar-expanded="true"] .tabbrowser-tab .tab-label {
+      font-size: 14px;
+    }
+    &:not([zen-single-toolbar="true"]) #nav-bar {
+      background: var(--lamplight-base) !important;
+      --toolbarbutton-padding-inner: 8px;
+      --toolbar-field-background-color: var(--lamplight-raised);
+      padding-inline: 6px;
+    }
+    &:not([zen-single-toolbar="true"]) #zen-appcontent-navbar-wrapper {
+      --zen-toolbar-height: 44px;
+    }
+    &:not([zen-single-toolbar="true"]) #urlbar-container {
+      --urlbar-height: 34px;
+      --urlbar-container-height: 40px;
+    }
+    & #urlbar .urlbar-background {
+      box-shadow: none !important;
+    }
+    & #tabbrowser-tabbox #tabbrowser-tabpanels .browserSidebarContainer:not(.zen-glance-overlay) {
+      border-radius: 9px;
+      box-shadow: 0 0 0 1px var(--lamplight-border);
+    }
+    & #navigator-toolbox[zen-sidebar-expanded="true"] #zen-sidebar-foot-buttons {
+      padding-inline: 4px;
+      padding-block: 9px;
+    }
+  }
+}
