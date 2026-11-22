@@ -1,6 +1,6 @@
 {
-  "name": "Zen Browser",
-  "vendor": "Zen OSS Team",
+  "name": "ProairetOS Browser",
+  "vendor": "ProairetOS",
   "appId": "zen",
   "binaryName": "zen",
   "version": {
@@ -15,14 +15,14 @@
   "addons": {},
   "brands": {
     "release": {
-      "backgroundColor": "#282A33",
-      "brandShorterName": "Zen",
-      "brandShortName": "Zen",
-      "brandFullName": "Zen Browser",
+      "backgroundColor": "#0B2636",
+      "brandShorterName": "ProairetOS",
+      "brandShortName": "ProairetOS",
+      "brandFullName": "ProairetOS Browser",
       "release": {
-        "displayVersion": "1.24.3b",
+        "displayVersion": "0.1.0",
         "github": {
-          "repo": "zen-browser/desktop"
+          "repo": "boleydavid7-gif/Proairetos-Browser"
         },
         "archives": {
           "windows": "windows.mar",
