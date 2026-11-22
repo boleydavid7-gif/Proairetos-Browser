@@ -1,0 +1,35 @@
+/* Lamplight homepage — retains Firefox search and shortcut functionality. */
+@-moz-document url("about:newtab"), url("about:home") {
+  :root {
+    --lp-bg: light-dark(#edf2f5,#0b2636);
+    --lp-card: light-dark(#ffffff,#16394b);
+    --lp-ink: light-dark(#183242,#edf5fa);
+    --lp-border: light-dark(#cbd9e2,#315365);
+    --lp-accent: light-dark(#006d85,#74d4ef);
+  }
+  body { background: var(--lp-bg) !important; color: var(--lp-ink) !important; font-family: system-ui,sans-serif !important; }
+  .search-wrapper { padding-block: 32px !important; }
+  .search-wrapper .search-handoff-button {
+    background-color: var(--lp-card) !important;
+    border: 1px solid var(--lp-border) !important;
+    border-radius: 16px !important;
+    min-height: 56px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.12) !important;
+    color: var(--lp-ink) !important;
+  }
+  .search-wrapper .search-handoff-button:hover { border-color: var(--lp-accent) !important; }
+  .top-site-outer .tile {
+    background-color: var(--lp-card) !important;
+    border: 1px solid var(--lp-border);
+    border-radius: 16px !important;
+    box-shadow: none !important;
+  }
+  .top-site-outer .title { color: var(--lp-ink) !important; }
+  @media (prefers-reduced-motion: no-preference) {
+    .search-wrapper { animation: lp-arrive 420ms cubic-bezier(.2,.75,.2,1) both; }
+    .top-sites { animation: lp-arrive 500ms 90ms cubic-bezier(.2,.75,.2,1) both; }
+    .top-site-outer .tile, .search-handoff-button { transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease !important; }
+    .top-site-outer:hover .tile { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.15) !important; }
+  }
+  @keyframes lp-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+}
