@@ -7,10 +7,10 @@ p=Path("engine/browser/base/content/browser.xhtml")
 j=Path("engine/browser/base/jar.mn")
 s=p.read_text()
 m=j.read_text()
-tag='<script src="chrome://browser/content/vela-native.js"/>'
+tag='<script src="chrome://browser/content/vela-native.js"></script>'
 if tag not in s:
     import re
-    matches=list(re.finditer(r'<script\b[^>]*src="chrome://browser/content/browser\.js"[^>]*(?:/>|>\s*</script>)',s))
+    matches=list(re.finditer(r'<script\b[^>]*src="chrome://browser/content/browser-main\.js"[^>]*(?:/>|>\s*</script>)',s))
     if len(matches)!=1:
         raise SystemExit("Browser script anchor not found; no source modified.")
     s=s[:matches[0].end()]+"\n  "+tag+s[matches[0].end():]
