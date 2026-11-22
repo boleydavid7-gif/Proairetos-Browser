@@ -1,5 +1,5 @@
 {
-  "name": "ProairetOS Browser",
+  "name": "Vela",
   "vendor": "ProairetOS",
   "appId": "zen",
   "binaryName": "zen",
@@ -16,9 +16,9 @@
   "brands": {
     "release": {
       "backgroundColor": "#0B2636",
-      "brandShorterName": "ProairetOS",
-      "brandShortName": "ProairetOS",
-      "brandFullName": "ProairetOS Browser",
+      "brandShorterName": "Vela",
+      "brandShortName": "Vela",
+      "brandFullName": "Vela",
       "release": {
         "displayVersion": "0.1.0",
         "github": {
