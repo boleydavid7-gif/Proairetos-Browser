@@ -48,7 +48,7 @@
     background-size: contain !important;
   }
   .search-wrapper .logo-and-wordmark::after {
-    content: "ProairetOS";
+    content: "Vela";
     color: var(--lp-ink);
     font-size: 32px;
     font-weight: 600;
@@ -96,7 +96,7 @@
   }
   .logo-and-wordmark-wrapper .wordmark { display: none !important; }
   .logo-and-wordmark-wrapper .logo-and-wordmark::after {
-    content: "ProairetOS";
+    content: "Vela";
     color: var(--lp-ink);
     font-size: 34px;
     font-weight: 600;
@@ -125,4 +125,13 @@
     content-search-handoff-ui { transition: box-shadow 220ms ease, transform 220ms ease; }
     content-search-handoff-ui:hover { box-shadow: 0 6px 24px #0002; transform: translateY(-1px); }
   }
+}
+
+@-moz-document url("about:newtab"), url("about:home") {
+.logo-and-wordmark-wrapper .logo-and-wordmark .logo { background-image: url("vela.svg") !important; width: 112px !important; height: 112px !important; }
+.logo-and-wordmark-wrapper .logo-and-wordmark::after { font-size: 44px; font-weight: 500; letter-spacing: -1px; }
+.search-wrapper { padding-block: 18px !important; }
+.logo-and-wordmark-wrapper .logo-and-wordmark { margin-block-end: 8px !important; gap: 2px !important; }
+body { background: radial-gradient(ellipse at 75% 80%, light-dark(#d9e4eb,#17364c),transparent 65%),var(--lp-bg) !important; }
+.top-site-outer .tile { border-radius: 12px !important; }
 }
