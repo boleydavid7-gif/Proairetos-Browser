@@ -363,7 +363,7 @@ export class nsZenSessionManager {
     }
     // Clear the memory of the groups saved in the session file,
     // as we don't really need them anyways.
-    if (initialState?.savedGroups) {
+    if (initialState) {
       initialState.savedGroups = [];
     }
     if (!lazy.gWindowSyncEnabled) {
