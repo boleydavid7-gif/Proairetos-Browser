@@ -11,3 +11,9 @@
 :root:not([privatebrowsingmode="temporary"],[popup-window]) #urlbar .urlbar-background { border-radius:12px !important; }
 :root:not([privatebrowsingmode="temporary"],[popup-window]) .urlbarView-row-inner { border-radius:8px !important; }
 @media (prefers-reduced-motion:no-preference) { #nav-bar toolbarbutton, .subviewbutton { transition:background-color 160ms ease,color 160ms ease; } }
+
+#vela-native-rail { margin:8px 6px; padding:8px 0; border-top:1px solid var(--lamplight-border); gap:3px; }
+#vela-native-rail .vela-rail-heading { font-size:12px; font-weight:600; color:var(--lamplight-muted); margin:4px 10px; }
+#vela-native-rail toolbarbutton { min-height:32px; padding-inline:10px; border-radius:8px; color:var(--lamplight-text); }
+#vela-native-rail toolbarbutton:hover { background:var(--lamplight-raised); }
+:root[zen-compact-mode="true"] #vela-native-rail, #navigator-toolbox:not([zen-sidebar-expanded="true"]) #vela-native-rail { display:none; }
