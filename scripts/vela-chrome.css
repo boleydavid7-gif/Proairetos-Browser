@@ -1,0 +1,13 @@
+:root:not([privatebrowsingmode="temporary"],[popup-window]) {
+--arrowpanel-background:var(--lamplight-surface, #102f40) !important;
+--arrowpanel-color:var(--lamplight-text,#edf5fa) !important;
+--arrowpanel-border-color:var(--lamplight-border,#28495b) !important;
+--arrowpanel-border-radius:12px !important;
+--panel-border-radius:12px !important;
+--toolbarbutton-border-radius:8px !important;
+}
+:root:not([privatebrowsingmode="temporary"],[popup-window],[zen-compact-mode="true"]) #navigator-toolbox[zen-sidebar-expanded="true"] .zen-current-workspace-indicator { margin-inline:6px !important; padding:10px !important; border-radius:8px !important; }
+:root:not([privatebrowsingmode="temporary"],[popup-window]) #nav-bar { --toolbarbutton-padding-inner:9px; }
+:root:not([privatebrowsingmode="temporary"],[popup-window]) #urlbar .urlbar-background { border-radius:12px !important; }
+:root:not([privatebrowsingmode="temporary"],[popup-window]) .urlbarView-row-inner { border-radius:8px !important; }
+@media (prefers-reduced-motion:no-preference) { #nav-bar toolbarbutton, .subviewbutton { transition:background-color 160ms ease,color 160ms ease; } }
