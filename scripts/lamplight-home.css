@@ -135,3 +135,12 @@
 body { background: radial-gradient(ellipse at 75% 80%, light-dark(#d9e4eb,#17364c),transparent 65%),var(--lp-bg) !important; }
 .top-site-outer .tile { border-radius: 12px !important; }
 }
+
+@-moz-document url("about:newtab"), url("about:home") {
+body { background: linear-gradient(180deg,rgba(7,24,43,.16),rgba(7,24,43,.55)),url("vela-landscape.svg") center / cover fixed !important; color: #edf5fa !important; }
+:root { --lp-ink:#edf5fa; --lp-card:#19364e; --lp-border:#36536b; }
+.search-wrapper .search-inner-wrapper { width:min(760px,84vw) !important; }
+.top-site-outer .title { color:#edf5fa !important; }
+@media (prefers-contrast: more) { body { background:#0b2636 !important; } }
+@media (forced-colors: active) { body { background:Canvas !important; color:CanvasText !important; } }
+}
