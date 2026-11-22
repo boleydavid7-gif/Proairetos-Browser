@@ -21,4 +21,4 @@ user_pref("browser.newtabpage.activity-stream.showSponsored", false);
 user_pref("browser.newtabpage.activity-stream.feeds.section.topstories", false);
 user_pref("browser.newtabpage.activity-stream.feeds.system.topstories", false);
 EOF
-exec "$root/engine/obj-x86_64-pc-linux-gnu/dist/bin/zen" --no-remote --profile "$profile"
+exec "$root/engine/obj-x86_64-pc-linux-gnu/dist/bin/zen" --profile "$profile" "$@"
