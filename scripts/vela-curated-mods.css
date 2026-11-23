@@ -1,0 +1,128 @@
+/* Vela / Lamplight curated Zen mod integrations.
+ * Adapted visual ideas (not a verbatim bundle) from:
+ *  - RobotoSkunk/ff-better-findbar (MIT)
+ *  - matteo-tafuro/zen-better-cleaned-url-bar (MIT)
+ *  - KiKaraage/ZenMods — Zen Context Menu (MIT)
+ * See scripts/VELA_MODS_NOTICES.md for sources and licenses.
+ *
+ * Deliberately leaves tabbrowser-tabs, #navigator-toolbox, Zen's native
+ * sidebar placement, the Vela tab strip and all web content untouched.
+ * Colors come ONLY from the active ProairetOS Lamplight palette.
+ */
+
+/* 1. Better Find Bar, adapted as a compact opaque Fluent flyout.
+ * Firefox's native findbar and accessibility controls are preserved. */
+:root[vela-mod-findbar="true"] findbar:not([hidden]) {
+  position: fixed !important;
+  inset: auto 18px 18px auto !important;
+  margin: 0 !important;
+  width: min(430px, calc(100vw - 40px)) !important;
+  max-width: calc(100vw - 40px) !important;
+  box-sizing: border-box;
+  border: 1px solid var(--lamplight-border) !important;
+  border-radius: 12px !important;
+  padding: 7px 10px !important;
+  background: var(--lamplight-surface) !important;
+  color: var(--lamplight-text) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.24) !important;
+  z-index: 10 !important;
+}
+:root[vela-mod-findbar="true"] findbar .findbar-container {
+  display: flex !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
+}
+:root[vela-mod-findbar="true"] findbar .findbar-textbox {
+  min-width: 120px !important;
+  flex: 1 1 160px;
+  min-height: 30px !important;
+  border-radius: 7px !important;
+  color: var(--lamplight-text) !important;
+  background: var(--lamplight-raised) !important;
+  border: 1px solid var(--lamplight-border) !important;
+}
+:root[vela-mod-findbar="true"] findbar .findbar-textbox:focus-visible {
+  outline: 2px solid var(--lamplight-accent) !important;
+  outline-offset: -2px;
+}
+:root[vela-mod-findbar="true"] findbar :is(toolbarbutton, checkbox) {
+  border-radius: 7px;
+  color: var(--lamplight-text) !important;
+}
+:root[vela-mod-findbar="true"] findbar :is(toolbarbutton, checkbox):hover {
+  background: var(--lamplight-raised) !important;
+}
+
+/* 2. Better Cleaned URL Bar, adapted without glass or page-color sampling:
+ * restrained radius, solid Mica-like tonal surfaces and Lamplight selection. */
+:root[vela-mod-urlbar="true"] #urlbar .urlbar-background {
+  border-radius: 11px !important;
+  border: 1px solid var(--lamplight-border) !important;
+  background: var(--lamplight-raised) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+:root[vela-mod-urlbar="true"] #urlbar[breakout-extend] .urlbar-background {
+  border-radius: 13px !important;
+  background: var(--lamplight-surface) !important;
+  border-color: var(--lamplight-border) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.20) !important;
+}
+:root[vela-mod-urlbar="true"] .urlbarView-row .urlbarView-row-inner {
+  border-radius: 8px !important;
+  transition: background-color 110ms ease;
+}
+:root[vela-mod-urlbar="true"] .urlbarView-row:is([selected],:hover) .urlbarView-row-inner {
+  background: color-mix(in srgb, var(--lamplight-accent) 15%, var(--lamplight-raised)) !important;
+}
+:root[vela-mod-urlbar="true"] .urlbarView-row .urlbarView-url {
+  color: var(--lamplight-muted) !important;
+}
+:root[vela-mod-urlbar="true"] #urlbar-input {
+  color: var(--lamplight-text) !important;
+}
+
+/* 3. Zen Context Menu, adapted without hiding, reordering, or disabling
+ * ANY native commands. Windows 11-like menu spacing and corner treatments. */
+:root[vela-mod-menus="true"] :is(
+  #contentAreaContextMenu, #tabContextMenu, #toolbar-context-menu,
+  #placesContext, #downloadsContextMenu
+) {
+  --panel-border-radius: 11px;
+  --panel-background: var(--lamplight-surface);
+  --panel-color: var(--lamplight-text);
+  --panel-border-color: var(--lamplight-border);
+  border-radius: 11px !important;
+  border: 1px solid var(--lamplight-border) !important;
+  background-color: var(--lamplight-surface) !important;
+  color: var(--lamplight-text) !important;
+  padding-block: 5px !important;
+}
+:root[vela-mod-menus="true"] :is(
+  #contentAreaContextMenu, #tabContextMenu, #toolbar-context-menu,
+  #placesContext, #downloadsContextMenu
+) > :is(menuitem, menu) {
+  border-radius: 7px;
+  margin-inline: 4px;
+  min-height: 30px;
+}
+:root[vela-mod-menus="true"] :is(
+  #contentAreaContextMenu, #tabContextMenu, #toolbar-context-menu,
+  #placesContext, #downloadsContextMenu
+) > :is(menuitem, menu):is([_moz-menuactive],:hover) {
+  background-color: var(--lamplight-raised) !important;
+}
+:root[vela-mod-menus="true"] :is(
+  #contentAreaContextMenu, #tabContextMenu, #toolbar-context-menu,
+  #placesContext, #downloadsContextMenu
+) > menuseparator {
+  margin: 5px 10px !important;
+  border-color: var(--lamplight-border) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[vela-mod-urlbar="true"] .urlbarView-row .urlbarView-row-inner {
+    transition: none !important;
+  }
+}
