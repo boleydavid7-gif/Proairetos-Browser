@@ -16,9 +16,18 @@
     const heading = document.createXULElement("hbox");
     heading.id = "vela-sidebar-heading";
     const title = document.createXULElement("label");
-    title.setAttribute("value", "Vela");
+    title.setAttribute("value", "ProairetOS Browser");
     title.className = "vela-rail-heading";
-    heading.append(title);
+    const brandMark = document.createXULElement("image");
+    brandMark.id = "vela-sidebar-brandmark";
+    brandMark.setAttribute("src", "chrome://browser/content/vela-logo.svg");
+    const brandWords = document.createXULElement("vbox");
+    brandWords.id = "vela-sidebar-brandwords";
+    const subTitle = document.createXULElement("label");
+    subTitle.className = "vela-rail-subtitle";
+    subTitle.setAttribute("value", "Vela");
+    brandWords.append(title, subTitle);
+    heading.append(brandMark, brandWords);
     rail.append(heading);
     const actions = document.createXULElement("vbox");
     actions.id = "vela-sidebar-actions";
@@ -30,7 +39,8 @@
       button.classList.add("vela-sidebar-action");
       button.addEventListener("command", () => {
         const target = document.getElementById(command);
-        if (target && !target.disabled) target.doCommand?.();
+        if (label === "Home") window.openTrustedLinkIn("about:home", "current");
+        else if (target && !target.disabled) target.doCommand?.();
         else if (label === "Bookmarks") window.PlacesCommandHook?.showPlacesOrganizer?.("AllBookmarks");
         else if (label === "History") window.PlacesCommandHook?.showPlacesOrganizer?.("History");
         else if (label === "Downloads") window.BrowserCommands?.downloadsUI?.();
@@ -39,27 +49,70 @@
       actions.append(button);
       return button;
     }
+    const home = action("Home", "Browser:Home", "Open Vela home");
+    home.id = "vela-sidebar-home";
     action("Bookmarks", "Browser:ShowAllBookmarks", "Manage bookmarks");
     action("History", "Browser:ShowAllHistory", "Browse history");
     action("Downloads", "Tools:Downloads", "Open downloads");
     const section = document.createXULElement("hbox");
     section.id = "vela-sites-heading";
     const sitesLabel = document.createXULElement("label");
-    sitesLabel.setAttribute("value", "Pinned sites");
+    sitesLabel.setAttribute("value", "Pinned");
     section.append(sitesLabel);
     const pin = document.createXULElement("toolbarbutton");
     pin.id = "vela-pin-site";
-    pin.setAttribute("label", "+");
-    pin.setAttribute("tooltiptext", "Pin current website");
+    pin.setAttribute("label", "+ Add site");
+    pin.setAttribute("tooltiptext", "Pin a website to the sidebar");
     section.append(pin);
     rail.append(section);
     const sites = document.createXULElement("vbox");
     sites.id = "vela-pinned-sites";
     rail.append(sites);
+    // Claude's Electron version offers address/name entry. Keep this in
+    // privileged browser chrome; never inject a form into web content.
+    const pinForm = document.createXULElement("vbox");
+    pinForm.id = "vela-add-site-form";
+    pinForm.hidden = true;
+    const urlLabel = document.createXULElement("label");
+    urlLabel.setAttribute("value", "Website address");
+    const urlInput = document.createElement("input");
+    urlInput.id = "vela-site-url";
+    urlInput.type = "url";
+    urlInput.placeholder = "https://example.com";
+    urlInput.autocomplete = "off";
+    urlInput.spellcheck = false;
+    const nameLabel = document.createXULElement("label");
+    nameLabel.setAttribute("value", "Name (optional)");
+    const nameInput = document.createElement("input");
+    nameInput.id = "vela-site-name";
+    nameInput.placeholder = "Website name";
+    nameInput.maxLength = 80;
+    nameInput.autocomplete = "off";
+    const error = document.createXULElement("label");
+    error.id = "vela-site-error";
+    error.hidden = true;
+    const formActions = document.createXULElement("hbox");
+    formActions.id = "vela-site-form-actions";
+    const cancel = document.createXULElement("toolbarbutton");
+    cancel.setAttribute("label", "Cancel");
+    const save = document.createXULElement("toolbarbutton");
+    save.setAttribute("label", "Pin site");
+    save.className = "vela-site-save";
+    formActions.append(cancel, save);
+    pinForm.append(urlLabel, urlInput, nameLabel, nameInput, error, formActions);
+    rail.append(pinForm);
+    const continueHeading = document.createXULElement("label");
+    continueHeading.id = "vela-continue-heading";
+    continueHeading.setAttribute("value", "Continue · Open tabs");
+    rail.append(continueHeading);
+    const continueTabs = document.createXULElement("vbox");
+    continueTabs.id = "vela-continue-tabs";
+    rail.append(continueTabs);
     const PIN_PREF = "vela.sidebar.sites";
     function readSites() {
       try {
-        const data = JSON.parse(Services.prefs.getStringPref(PIN_PREF, "[]"));
+        const data = JSON.parse(Services.prefs.getStringPref(PIN_PREF,
+          JSON.stringify([{ url: "https://proairetos.com/", title: "Proairetos" }])));
         if (!Array.isArray(data)) return [];
         return data.filter(item => item && typeof item.url === "string" &&
           normalizedSite(item.url) && typeof item.title === "string").slice(0, 20);
@@ -85,6 +138,10 @@
       for (const site of pinned) {
         const row = document.createXULElement("hbox");
         row.className = "vela-site-row";
+        const mark = document.createXULElement("label");
+        mark.className = "vela-site-mark";
+        mark.setAttribute("value", site.title.trim().slice(0, 1).toUpperCase() || "•");
+        if (new URL(site.url).hostname === "proairetos.com") mark.classList.add("is-proairetos");
         const open = document.createXULElement("toolbarbutton");
         open.className = "vela-site-open";
         open.setAttribute("label", site.title.slice(0, 48));
@@ -98,22 +155,55 @@
           saveSites(readSites().filter(item => item.url !== site.url));
           renderSites();
         });
-        row.append(open, remove);
+        row.append(mark, open, remove);
         sites.append(row);
       }
     }
-    pin.addEventListener("command", () => {
+    function hidePinForm() {
+      pinForm.hidden = true;
+      pin.hidden = false;
+      error.hidden = true;
+    }
+    function openPinForm() {
       const current = window.gBrowser?.selectedBrowser;
-      const url = current?.currentURI?.spec || "";
-      if (!normalizedSite(url)) return;
-      const title = (window.gBrowser?.selectedTab?.label || new URL(url).hostname).slice(0, 80);
-      const pinned = readSites();
-      if (!pinned.some(item => item.url === url)) {
-        pinned.push({ url, title });
-        saveSites(pinned.slice(-20));
-        renderSites();
+      const currentUrl = current?.currentURI?.spec || "";
+      urlInput.value = normalizedSite(currentUrl) ? currentUrl : "";
+      nameInput.value = normalizedSite(currentUrl)
+        ? (window.gBrowser?.selectedTab?.label || "").slice(0, 80) : "";
+      pin.hidden = true;
+      pinForm.hidden = false;
+      error.hidden = true;
+      urlInput.focus();
+      urlInput.select();
+    }
+    function submitPinnedSite() {
+      let address = urlInput.value.trim();
+      if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(address)) address = "https://" + address;
+      if (!normalizedSite(address)) {
+        error.setAttribute("value", "Enter a valid http or https website");
+        error.hidden = false;
+        return;
       }
-    });
+      const parsed = new URL(address);
+      const canonical = parsed.href;
+      const title = nameInput.value.trim().slice(0, 80) || parsed.hostname;
+      const pinned = readSites();
+      if (!pinned.some(item => item.url === canonical)) {
+        pinned.push({ url: canonical, title });
+        saveSites(pinned.slice(-20));
+      }
+      hidePinForm();
+      renderSites();
+    }
+    pin.addEventListener("command", openPinForm);
+    cancel.addEventListener("command", hidePinForm);
+    save.addEventListener("command", submitPinnedSite);
+    for (const input of [urlInput, nameInput]) {
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") { event.preventDefault(); submitPinnedSite(); }
+        if (event.key === "Escape") { event.preventDefault(); hidePinForm(); }
+      });
+    }
     renderSites();
     // Put tools in the sidebar Zen already opens, never in a second panel.
     toolbox.append(rail);
@@ -143,11 +233,35 @@
       const browser = window.gBrowser;
       const visible = Array.from(browser.visibleTabs || browser.tabs || []);
       tabs.replaceChildren();
+      // Same browsing session as Firefox, not a parallel Electron tab store.
+      continueTabs.replaceChildren();
+      const candidates = visible.filter(tab => tab !== browser.selectedTab &&
+        !["about:newtab", "about:blank"].includes(tab.linkedBrowser?.currentURI?.spec));
+      for (const tab of candidates.slice(-5).reverse()) {
+        const button = document.createXULElement("toolbarbutton");
+        button.className = "vela-continue-item";
+        button.setAttribute("label", (tab.label || "Untitled tab").slice(0, 50));
+        button.setAttribute("tooltiptext", tab.label || "Switch to tab");
+        button.addEventListener("command", () => { browser.selectedTab = tab; });
+        continueTabs.append(button);
+      }
+      continueHeading.hidden = candidates.length === 0;
+      continueTabs.hidden = candidates.length === 0;
+      home.setAttribute("aria-current", ["about:home", "about:newtab"].includes(
+        browser.selectedBrowser?.currentURI?.spec) ? "page" : "false");
       for (const tab of visible) {
         const item = document.createXULElement("hbox");
         item.className = "vela-tab-item";
         if (tab === browser.selectedTab) item.setAttribute("selected", "true");
         item.setAttribute("tooltiptext", tab.label || "New tab");
+        const favicon = document.createXULElement("image");
+        favicon.className = "vela-tab-favicon";
+        const faviconUrl = tab.getAttribute("image") || "";
+        // Reuse Firefox's resolved icon. Only trusted browser schemes or data
+        // images are admitted to privileged chrome; never fetch arbitrary URLs.
+        if (/^(?:chrome:|resource:|page-icon:|data:image\/)/i.test(faviconUrl)) {
+          favicon.setAttribute("src", faviconUrl);
+        } else favicon.setAttribute("src", "chrome://browser/content/vela-logo.svg");
         const select = document.createXULElement("toolbarbutton");
         select.className = "vela-tab-select";
         select.setAttribute("label", tab.label || "New tab");
@@ -157,7 +271,10 @@
         close.setAttribute("label", "×");
         close.setAttribute("tooltiptext", "Close tab");
         close.addEventListener("command", () => browser.removeTab(tab));
-        item.append(select, close);
+        select.addEventListener("auxclick", event => {
+          if (event.button === 1) { event.preventDefault(); browser.removeTab(tab); }
+        });
+        item.append(favicon, select, close);
         tabs.append(item);
       }
     }
