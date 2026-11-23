@@ -115,31 +115,6 @@
       }
     });
     renderSites();
-    // Keep this panel independent of Zen's tab rail; native browser UI stays intact.
-    const resize = document.createXULElement("box");
-    resize.id = "vela-sidebar-resize";
-    resize.setAttribute("tooltiptext", "Drag to resize browser tools");
-    rail.append(resize);
-    const clamp = n => Math.max(190, Math.min(380, n));
-    const width = clamp(Services.prefs.getIntPref("vela.sidebar.width", 248));
-    root.style.setProperty("--vela-sidebar-width", width + "px");
-    resize.addEventListener("pointerdown", event => {
-      if (event.button !== 0) return;
-      const initial = event.screenX;
-      const startWidth = rail.getBoundingClientRect().width;
-      const direction = getComputedStyle(rail).direction === "rtl" ? -1 : 1;
-      const move = e => root.style.setProperty("--vela-sidebar-width", clamp(startWidth + (e.screenX - initial) * direction) + "px");
-      const end = () => {
-        window.removeEventListener("pointermove", move, true);
-        window.removeEventListener("pointerup", end, true);
-        window.removeEventListener("blur", end, true);
-        Services.prefs.setIntPref("vela.sidebar.width", clamp(parseInt(root.style.getPropertyValue("--vela-sidebar-width"), 10) || width));
-      };
-      window.addEventListener("pointermove", move, true);
-      window.addEventListener("pointerup", end, true);
-      window.addEventListener("blur", end, true);
-      event.preventDefault();
-    });
     // Put tools in the sidebar Zen already opens, never in a second panel.
     toolbox.append(rail);
     // Mirror only the tab controls. Firefox keeps ownership of the real tabs.
@@ -194,9 +169,20 @@
         renderTabs();
       });
     }
-    const tabContainer = window.gBrowser?.tabContainer;
+    let tabContainer = null;
     const events = ["TabOpen", "TabClose", "TabSelect", "TabMove", "TabAttrModified", "TabHide", "TabShow", "TabPinned", "TabUnpinned"];
-    for (const event of events) tabContainer?.addEventListener(event, scheduleTabs);
+    let retry = 0;
+    function bindTabs() {
+      const next = window.gBrowser?.tabContainer;
+      if (!next) {
+        if (retry++ < 30) window.setTimeout(bindTabs, 300);
+        return;
+      }
+      tabContainer = next;
+      for (const event of events) tabContainer.addEventListener(event, scheduleTabs);
+      scheduleTabs();
+    }
+    bindTabs();
     window.addEventListener("unload", () => {
       for (const event of events) tabContainer?.removeEventListener(event, scheduleTabs);
       strip.remove();
