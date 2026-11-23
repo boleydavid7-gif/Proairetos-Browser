@@ -8,6 +8,7 @@
         root.hasAttribute("privatebrowsingmode")) return;
     const toolbox = document.getElementById("navigator-toolbox");
     if (!toolbox) return;
+    if (document.getElementById("vela-native-rail")) return;
     const Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs").Services;
     const rail = document.createXULElement("vbox");
     rail.id = "vela-native-rail";
@@ -27,8 +28,14 @@
       button.setAttribute("label", label);
       button.setAttribute("tooltiptext", tooltip || label);
       button.classList.add("vela-sidebar-action");
-      if (document.getElementById(command)) button.setAttribute("command", command);
-      else button.addEventListener("command", () => console.warn("Vela: unavailable browser command", command));
+      button.addEventListener("command", () => {
+        const target = document.getElementById(command);
+        if (target && !target.disabled) target.doCommand?.();
+        else if (label === "Bookmarks") window.PlacesCommandHook?.showPlacesOrganizer?.("AllBookmarks");
+        else if (label === "History") window.PlacesCommandHook?.showPlacesOrganizer?.("History");
+        else if (label === "Downloads") window.BrowserCommands?.downloadsUI?.();
+        else console.warn("Vela: unavailable browser command", command);
+      });
       actions.append(button);
       return button;
     }
@@ -126,6 +133,7 @@
       event.preventDefault();
     });
     toolbox.append(rail);
+    root.setAttribute("vela-sidebar-ready", "true");
     // Reuse Firefox's actual tab nodes: no mirrored tab state or duplicate events.
     // Zen may change its toolbar structure between releases, so fail safely.
     const tabBrowser = document.getElementById("tabbrowser-tabs");
@@ -171,8 +179,17 @@
       Services.prefs.setBoolPref("vela.tools.collapsed", collapsed);
     }
     toolsToggle.addEventListener("command", () => setCollapsed(root.getAttribute("vela-tools-collapsed") !== "true"));
-    toolbox.append(toolsToggle);
+    if (document.getElementById("vela-top-tabs")) document.getElementById("vela-top-tabs").append(toolsToggle);
+    else toolbox.append(toolsToggle);
     setCollapsed(Services.prefs.getBoolPref("vela.tools.collapsed", false));
+    const keyHandler = event => {
+      if (event.ctrlKey && event.shiftKey && !event.altKey && event.key.toLowerCase() === "b") {
+        event.preventDefault();
+        setCollapsed(root.getAttribute("vela-tools-collapsed") !== "true");
+      }
+    };
+    window.addEventListener("keydown", keyHandler, true);
+    window.addEventListener("unload", () => window.removeEventListener("keydown", keyHandler, true), { once: true });
     const roles = {
       page:"base", surface:"surface", raised:"raised", text:"text",
       muted:"muted", accent:"accent", border:"border"
