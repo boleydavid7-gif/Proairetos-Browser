@@ -4,22 +4,11 @@ cd "$(dirname "$0")/.."
 command -v rsvg-convert >/dev/null || { echo "Install librsvg2-bin first" >&2; exit 1; }
 brand=engine/browser/branding/unofficial
 test -d "$brand"
-python3 - <<'PY'
-from pathlib import Path
-import re
-for brand in Path("engine/browser/branding").iterdir():
-    if not brand.is_dir():
-        continue
-    p=brand / "locales" / "en-US" / "brand.ftl"
-    if not p.is_file():
-        continue
-    s=p.read_text()
-    for key in ("brand-shorter-name","brand-short-name","brand-full-name","brand-product-name"):
-        s=re.sub(r"(?m)^-"+key+r"\s*=.*$", "-"+key+" = Vela",s)
-    p.write_text(s)
-PY
-# Replace visible Zen labels only in localization files and launcher metadata.
-# Never alter zen.* prefs, compiled code identifiers, URLs, or legal notices.
+# The safe branding script updates brand.ftl as well as other English UI
+# translations. Do not pre-edit Fluent files with regex: that previously
+# produced concatenated settings keys when newline endings were lost.
+# Repair any malformed Fluent entries from the checked-out engine HEAD and
+# safely replace only display strings, not keys, URLs or identifiers.
 python3 scripts/brand-vela-ui.py
 for size in 16 22 24 32 48 64 128 256 512; do
   if test -f "$brand/default$size.png"; then
