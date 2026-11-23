@@ -32,7 +32,7 @@ PLACEABLE = re.compile(r"(\{[^{}]*\})")
 # A second zen-settings-window-... = token in an existing message value is
 # a reliable signature of the prior newline-stripping bug.
 MERGED_FTL_KEYS = re.compile(
-    r"(?im)^[ \t]*[-\w]+[ \t]*=[^\r\n]*\bzen-[a-z0-9-]{3,}[ \t]*="
+    r"(?im)^[ \t]*[-\w]+[ \t]*=[^\r\n]*zen-[a-z0-9-]{3,}[ \t]*="
 )
 BRAND_KEYS = (
     "brand-shorter-name",
