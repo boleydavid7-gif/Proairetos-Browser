@@ -146,6 +146,12 @@
         open.className = "vela-site-open";
         open.setAttribute("label", site.title.slice(0, 48));
         open.setAttribute("tooltiptext", site.url);
+        const activeUrl = window.gBrowser?.selectedBrowser?.currentURI?.spec || "";
+        try {
+          if (new URL(activeUrl).hostname === new URL(site.url).hostname) {
+            open.setAttribute("aria-current", "page");
+          }
+        } catch { /* about: pages do not have a website hostname */ }
         open.addEventListener("command", () => window.openTrustedLinkIn(site.url, "tab"));
         const remove = document.createXULElement("toolbarbutton");
         remove.className = "vela-site-remove";
@@ -249,6 +255,7 @@
       continueTabs.hidden = candidates.length === 0;
       home.setAttribute("aria-current", ["about:home", "about:newtab"].includes(
         browser.selectedBrowser?.currentURI?.spec) ? "page" : "false");
+      renderSites();
       for (const tab of visible) {
         const item = document.createXULElement("hbox");
         item.className = "vela-tab-item";
