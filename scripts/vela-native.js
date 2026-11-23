@@ -20,6 +20,12 @@
     title.className = "vela-rail-heading";
     heading.append(title);
     rail.append(heading);
+    const closeTools = document.createXULElement("toolbarbutton");
+    closeTools.id = "vela-sidebar-close";
+    closeTools.setAttribute("label", "×");
+    closeTools.setAttribute("tooltiptext", "Hide sidebar");
+    closeTools.addEventListener("command", () => setCollapsed(true));
+    heading.append(closeTools);
     const actions = document.createXULElement("vbox");
     actions.id = "vela-sidebar-actions";
     rail.append(actions);
@@ -62,10 +68,17 @@
         const data = JSON.parse(Services.prefs.getStringPref(PIN_PREF, "[]"));
         if (!Array.isArray(data)) return [];
         return data.filter(item => item && typeof item.url === "string" &&
-          /^https?:\/\//i.test(item.url) && typeof item.title === "string").slice(0, 20);
+          normalizedSite(item.url) && typeof item.title === "string").slice(0, 20);
       } catch { return []; }
     }
     function saveSites(data) { Services.prefs.setStringPref(PIN_PREF, JSON.stringify(data)); }
+    function normalizedSite(url) {
+      try {
+        const parsed = new URL(url);
+        return (parsed.protocol === "https:" || parsed.protocol === "http:") &&
+          !parsed.username && !parsed.password && url.length <= 2048;
+      } catch { return false; }
+    }
     function renderSites() {
       sites.replaceChildren();
       const pinned = readSites();
@@ -98,7 +111,7 @@
     pin.addEventListener("command", () => {
       const current = window.gBrowser?.selectedBrowser;
       const url = current?.currentURI?.spec || "";
-      if (!/^https?:\/\//i.test(url) || url.length > 2048) return;
+      if (!normalizedSite(url)) return;
       const title = (window.gBrowser?.selectedTab?.label || new URL(url).hostname).slice(0, 80);
       const pinned = readSites();
       if (!pinned.some(item => item.url === url)) {
@@ -108,6 +121,7 @@
       }
     });
     renderSites();
+    // Keep this panel independent of Zen's tab rail; native browser UI stays intact.
     const resize = document.createXULElement("box");
     resize.id = "vela-sidebar-resize";
     resize.setAttribute("tooltiptext", "Drag to resize browser tools");
@@ -119,7 +133,7 @@
       if (event.button !== 0) return;
       const initial = event.screenX;
       const startWidth = rail.getBoundingClientRect().width;
-      const direction = getComputedStyle(toolbox).direction === "rtl" ? -1 : 1;
+      const direction = getComputedStyle(rail).direction === "rtl" ? -1 : 1;
       const move = e => root.style.setProperty("--vela-sidebar-width", clamp(startWidth + (e.screenX - initial) * direction) + "px");
       const end = () => {
         window.removeEventListener("pointermove", move, true);
@@ -132,7 +146,9 @@
       window.addEventListener("blur", end, true);
       event.preventDefault();
     });
-    toolbox.append(rail);
+    const sidebarHost = document.getElementById("zen-main-app-wrapper") ||
+      document.getElementById("browser") || toolbox.parentNode;
+    sidebarHost.insertBefore(rail, sidebarHost.firstChild);
     root.setAttribute("vela-sidebar-ready", "true");
     // Reuse Firefox's actual tab nodes: no mirrored tab state or duplicate events.
     // Zen may change its toolbar structure between releases, so fail safely.
@@ -182,6 +198,11 @@
     if (document.getElementById("vela-top-tabs")) document.getElementById("vela-top-tabs").append(toolsToggle);
     else toolbox.append(toolsToggle);
     setCollapsed(Services.prefs.getBoolPref("vela.tools.collapsed", false));
+    window.addEventListener("unload", () => {
+      root.removeAttribute("vela-sidebar-ready");
+      rail.remove();
+      toolsToggle.remove();
+    }, { once: true });
     const roles = {
       page:"base", surface:"surface", raised:"raised", text:"text",
       muted:"muted", accent:"accent", border:"border"
