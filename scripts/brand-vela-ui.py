@@ -19,7 +19,8 @@ LOCALE_ROOTS = (
     ENGINE / "toolkit" / "locales",
 )
 ASSIGN = re.compile(r"^(\s*[-.\w][-.\w]*\s*=\s*)(.*)$")
-ZEN = re.compile(r"(?<![\w./@-])Zen(?![\w./@-])")
+ZEN_BROWSER = re.compile(r"(?<![\\w./@-])Zen Browser(?![\\w./@-])", re.IGNORECASE)
+ZEN = re.compile(r"(?<![\\w./@-])Zen(?![\\w./@-])", re.IGNORECASE)
 PLACEABLE = re.compile(r"(\{[^{}]*\})")
 
 
@@ -30,14 +31,14 @@ def replace_text(value: str) -> str:
         piece = pieces[index]
         if "zen-browser." in piece or "github.com/" in piece or "https://" in piece:
             continue
-        pieces[index] = ZEN.sub("Vela", piece)
+        pieces[index] = ZEN.sub("Vela", ZEN_BROWSER.sub("Vela", piece))
     return "".join(pieces)
 
 
 def convert_locale(content: str) -> str:
     result = []
     for line in content.splitlines(keepends=True):
-        if not "Zen" in line or line.lstrip().startswith("#"):
+        if not re.search(r"zen", line, re.IGNORECASE) or line.lstrip().startswith("#"):
             result.append(line)
             continue
         match = ASSIGN.match(line)
@@ -73,7 +74,7 @@ def convert_launcher(content: str) -> str:
     result = []
     for line in content.splitlines(keepends=True):
         match = re.match(r"^((?:Name|GenericName|Comment)(?:\[[^]]+\])?=)(.*)$", line)
-        if match and "Zen" in match.group(2):
+        if match and re.search(r"zen", match.group(2), re.IGNORECASE):
             line = match.group(1) + replace_text(match.group(2))
         result.append(line)
     return "".join(result)
