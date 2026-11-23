@@ -27,53 +27,58 @@
       rail.append(button);
     }
     toolbox.append(rail);
-    // Keep Zen's real tabs intact during the first horizontal-layout experiment.
-    // The top strip mirrors the active workspace; native tabs remain available.
+    // Reuse Firefox's actual tab nodes: no mirrored tab state or duplicate events.
+    // Zen may change its toolbar structure between releases, so fail safely.
+    const tabBrowser = document.getElementById("tabbrowser-tabs");
     const nav = document.getElementById("zen-appcontent-navbar-wrapper");
-    if (nav && window.gBrowser) {
+    if (tabBrowser && nav && !document.getElementById("vela-top-tabs")) {
+      const originalParent = tabBrowser.parentNode;
+      const originalNext = tabBrowser.nextSibling;
       const strip = document.createXULElement("hbox");
       strip.id = "vela-top-tabs";
       strip.setAttribute("align", "center");
-      nav.before(strip);
-      const tabs = document.createXULElement("hbox");
-      tabs.id = "vela-top-tab-list";
-      strip.append(tabs);
       const add = document.createXULElement("toolbarbutton");
+      add.id = "vela-add-tab";
       add.setAttribute("label", "+");
       add.setAttribute("tooltiptext", "New tab");
-      add.addEventListener("command", () => window.BrowserCommands.openTab());
-      strip.append(add);
-      function render() {
-        tabs.replaceChildren();
-        for (const tab of gBrowser.visibleTabs) {
-          const item = document.createXULElement("hbox");
-          item.className = "vela-top-tab";
-          item.toggleAttribute("selected", tab.selected);
-          const button = document.createXULElement("toolbarbutton");
-          button.setAttribute("label", tab.label || "New tab");
-          button.setAttribute("crop", "end");
-          if (tab.image) button.setAttribute("image", tab.image);
-          button.addEventListener("command", () => { gBrowser.selectedTab = tab; });
-          const close = document.createXULElement("toolbarbutton");
-          close.setAttribute("label", "×");
-          close.setAttribute("tooltiptext", "Close tab");
-          close.addEventListener("command", () => gBrowser.removeTab(tab, {animate:true}));
-          item.append(button, close);
-          tabs.append(item);
-        }
+      add.addEventListener("command", () => window.BrowserCommands?.openTab());
+      try {
+        nav.before(strip);
+        strip.append(tabBrowser);
+        tabBrowser.setAttribute("orient", "horizontal");
+        strip.append(add);
+        root.setAttribute("vela-top-tabs", "true");
+        window.addEventListener("unload", () => {
+          if (originalParent?.isConnected) {
+            if (originalNext?.parentNode === originalParent) originalParent.insertBefore(tabBrowser, originalNext);
+            else originalParent.append(tabBrowser);
+          }
+        }, { once: true });
+      } catch (error) {
+        console.error("Vela horizontal tabs unavailable", error);
+        if (originalParent?.isConnected) originalParent.append(tabBrowser);
+        strip.remove();
       }
-      let queued = false;
-      const schedule = () => {
-        if (queued) return;
-        queued = true;
-        window.requestAnimationFrame(() => { queued = false; render(); });
-      };
-      for (const event of ["TabOpen","TabClose","TabSelect","TabMove","TabAttrModified","TabHide","TabShow","TabPinned","TabUnpinned"]) {
-        gBrowser.tabContainer.addEventListener(event, schedule);
-      }
-      render();
-      root.setAttribute("vela-top-tabs", "true");
     }
+    // The sidebar is a separate set of native browser tools, not another tab list.
+    rail.setAttribute("aria-label", "Browser tools");
+    const toolsToggle = document.createXULElement("toolbarbutton");
+    toolsToggle.id = "vela-tools-toggle";
+    toolsToggle.setAttribute("label", "Tools");
+    toolsToggle.setAttribute("tooltiptext", "Show or hide browser tools");
+    toolsToggle.addEventListener("command", () => {
+      const collapsed = root.getAttribute("vela-tools-collapsed") === "true";
+      root.setAttribute("vela-tools-collapsed", String(!collapsed));
+      try {
+        const Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs").Services;
+        Services.prefs.setBoolPref("vela.tools.collapsed", !collapsed);
+      } catch (error) { console.warn("Vela tools preference unavailable", error); }
+    });
+    toolbox.append(toolsToggle);
+    try {
+      const Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs").Services;
+      root.setAttribute("vela-tools-collapsed", String(Services.prefs.getBoolPref("vela.tools.collapsed", false)));
+    } catch { root.setAttribute("vela-tools-collapsed", "false"); }
     const roles = {
       page:"base", surface:"surface", raised:"raised", text:"text",
       muted:"muted", accent:"accent", border:"border"
@@ -103,7 +108,7 @@
           if (!match) throw new Error("Invalid palette");
           values[role] = match[1];
         }
-        root.setAttribute("vela-desktop-palette", "true");
+        root.removeAttribute("vela-palette-warning");\n        root.setAttribute("vela-desktop-palette", "true");
         for (const [role, color] of Object.entries(values)) root.style.setProperty("--lamplight-"+roles[role],color,"important");
       } catch {
         root.removeAttribute("vela-desktop-palette");
