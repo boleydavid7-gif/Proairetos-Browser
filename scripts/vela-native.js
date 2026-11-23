@@ -8,24 +8,123 @@
         root.hasAttribute("privatebrowsingmode")) return;
     const toolbox = document.getElementById("navigator-toolbox");
     if (!toolbox) return;
+    const Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs").Services;
     const rail = document.createXULElement("vbox");
     rail.id = "vela-native-rail";
-    const heading = document.createXULElement("label");
-    heading.setAttribute("value", "Vela");
-    heading.className = "vela-rail-heading";
+    rail.setAttribute("aria-label", "Vela browser tools");
+    const heading = document.createXULElement("hbox");
+    heading.id = "vela-sidebar-heading";
+    const title = document.createXULElement("label");
+    title.setAttribute("value", "Vela");
+    title.className = "vela-rail-heading";
+    heading.append(title);
     rail.append(heading);
-    for (const [label, command] of [
-      ["History", "Browser:ShowAllHistory"],
-      ["Bookmarks", "Browser:ShowAllBookmarks"],
-      ["Downloads", "Tools:Downloads"],
-    ]) {
-      const target = document.getElementById(command);
-      if (!target) continue;
+    const actions = document.createXULElement("vbox");
+    actions.id = "vela-sidebar-actions";
+    rail.append(actions);
+    function action(label, command, tooltip) {
       const button = document.createXULElement("toolbarbutton");
       button.setAttribute("label", label);
-      button.setAttribute("command", command);
-      rail.append(button);
+      button.setAttribute("tooltiptext", tooltip || label);
+      button.classList.add("vela-sidebar-action");
+      if (document.getElementById(command)) button.setAttribute("command", command);
+      else button.addEventListener("command", () => console.warn("Vela: unavailable browser command", command));
+      actions.append(button);
+      return button;
     }
+    action("Bookmarks", "Browser:ShowAllBookmarks", "Manage bookmarks");
+    action("History", "Browser:ShowAllHistory", "Browse history");
+    action("Downloads", "Tools:Downloads", "Open downloads");
+    const section = document.createXULElement("hbox");
+    section.id = "vela-sites-heading";
+    const sitesLabel = document.createXULElement("label");
+    sitesLabel.setAttribute("value", "Pinned sites");
+    section.append(sitesLabel);
+    const pin = document.createXULElement("toolbarbutton");
+    pin.id = "vela-pin-site";
+    pin.setAttribute("label", "+");
+    pin.setAttribute("tooltiptext", "Pin current website");
+    section.append(pin);
+    rail.append(section);
+    const sites = document.createXULElement("vbox");
+    sites.id = "vela-pinned-sites";
+    rail.append(sites);
+    const PIN_PREF = "vela.sidebar.sites";
+    function readSites() {
+      try {
+        const data = JSON.parse(Services.prefs.getStringPref(PIN_PREF, "[]"));
+        if (!Array.isArray(data)) return [];
+        return data.filter(item => item && typeof item.url === "string" &&
+          /^https?:\/\//i.test(item.url) && typeof item.title === "string").slice(0, 20);
+      } catch { return []; }
+    }
+    function saveSites(data) { Services.prefs.setStringPref(PIN_PREF, JSON.stringify(data)); }
+    function renderSites() {
+      sites.replaceChildren();
+      const pinned = readSites();
+      if (!pinned.length) {
+        const empty = document.createXULElement("label");
+        empty.id = "vela-sites-empty";
+        empty.setAttribute("value", "Pin sites you visit often");
+        sites.append(empty);
+      }
+      for (const site of pinned) {
+        const row = document.createXULElement("hbox");
+        row.className = "vela-site-row";
+        const open = document.createXULElement("toolbarbutton");
+        open.className = "vela-site-open";
+        open.setAttribute("label", site.title.slice(0, 48));
+        open.setAttribute("tooltiptext", site.url);
+        open.addEventListener("command", () => window.openTrustedLinkIn(site.url, "tab"));
+        const remove = document.createXULElement("toolbarbutton");
+        remove.className = "vela-site-remove";
+        remove.setAttribute("label", "×");
+        remove.setAttribute("tooltiptext", "Unpin " + site.title);
+        remove.addEventListener("command", () => {
+          saveSites(readSites().filter(item => item.url !== site.url));
+          renderSites();
+        });
+        row.append(open, remove);
+        sites.append(row);
+      }
+    }
+    pin.addEventListener("command", () => {
+      const current = window.gBrowser?.selectedBrowser;
+      const url = current?.currentURI?.spec || "";
+      if (!/^https?:\/\//i.test(url) || url.length > 2048) return;
+      const title = (window.gBrowser?.selectedTab?.label || new URL(url).hostname).slice(0, 80);
+      const pinned = readSites();
+      if (!pinned.some(item => item.url === url)) {
+        pinned.push({ url, title });
+        saveSites(pinned.slice(-20));
+        renderSites();
+      }
+    });
+    renderSites();
+    const resize = document.createXULElement("box");
+    resize.id = "vela-sidebar-resize";
+    resize.setAttribute("tooltiptext", "Drag to resize browser tools");
+    rail.append(resize);
+    const clamp = n => Math.max(190, Math.min(380, n));
+    const width = clamp(Services.prefs.getIntPref("vela.sidebar.width", 248));
+    root.style.setProperty("--vela-sidebar-width", width + "px");
+    resize.addEventListener("pointerdown", event => {
+      if (event.button !== 0) return;
+      const initial = event.screenX;
+      const startWidth = rail.getBoundingClientRect().width;
+      const direction = getComputedStyle(toolbox).direction === "rtl" ? -1 : 1;
+      const move = e => root.style.setProperty("--vela-sidebar-width", clamp(startWidth + (e.screenX - initial) * direction) + "px");
+      const end = () => {
+        window.removeEventListener("pointermove", move, true);
+        window.removeEventListener("pointerup", end, true);
+        window.removeEventListener("blur", end, true);
+        Services.prefs.setIntPref("vela.sidebar.width", clamp(parseInt(root.style.getPropertyValue("--vela-sidebar-width"), 10) || width));
+      };
+      window.addEventListener("pointermove", move, true);
+      window.addEventListener("pointerup", end, true);
+      window.addEventListener("blur", end, true);
+      event.preventDefault();
+    });
     toolbox.append(rail);
     // Reuse Firefox's actual tab nodes: no mirrored tab state or duplicate events.
     // Zen may change its toolbar structure between releases, so fail safely.
@@ -60,33 +159,20 @@
         strip.remove();
       }
     }
-    // The sidebar is a separate set of native browser tools, not another tab list.
-    rail.setAttribute("aria-label", "Browser tools");
+    // Browser tools are independent of the horizontal tab strip.
     const toolsToggle = document.createXULElement("toolbarbutton");
     toolsToggle.id = "vela-tools-toggle";
     toolsToggle.setAttribute("label", "Tools");
     toolsToggle.setAttribute("tooltiptext", "Show or hide browser tools");
-    toolsToggle.addEventListener("command", () => {
-      const collapsed = root.getAttribute("vela-tools-collapsed") === "true";
-      root.setAttribute("vela-tools-collapsed", String(!collapsed));
-      try {
-        const Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs").Services;
-        Services.prefs.setBoolPref("vela.tools.collapsed", !collapsed);
-      } catch (error) { console.warn("Vela tools preference unavailable", error); }
-    });
-    toolbox.append(toolsToggle);
     toolsToggle.setAttribute("aria-controls", "vela-native-rail");
-    try {
-      const Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs").Services;
-      root.setAttribute("vela-tools-collapsed", String(Services.prefs.getBoolPref("vela.tools.collapsed", false)));
-    } catch { root.setAttribute("vela-tools-collapsed", "false"); }
-    // Keep the tools visible even if Zen collapses its original tab sidebar.
-    // Expose browser-owned panels rather than duplicating bookmark/history data.
-    const library = document.createXULElement("toolbarbutton");
-    library.setAttribute("label", "Library");
-    library.setAttribute("tooltiptext", "Manage bookmarks, history and downloads");
-    library.addEventListener("command", () => window.PlacesCommandHook?.showPlacesOrganizer?.("AllBookmarks"));
-    rail.append(library);
+    function setCollapsed(collapsed) {
+      root.setAttribute("vela-tools-collapsed", String(collapsed));
+      toolsToggle.setAttribute("aria-expanded", String(!collapsed));
+      Services.prefs.setBoolPref("vela.tools.collapsed", collapsed);
+    }
+    toolsToggle.addEventListener("command", () => setCollapsed(root.getAttribute("vela-tools-collapsed") !== "true"));
+    toolbox.append(toolsToggle);
+    setCollapsed(Services.prefs.getBoolPref("vela.tools.collapsed", false));
     const roles = {
       page:"base", surface:"surface", raised:"raised", text:"text",
       muted:"muted", accent:"accent", border:"border"
