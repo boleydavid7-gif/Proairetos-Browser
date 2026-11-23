@@ -144,3 +144,74 @@ body { background: linear-gradient(180deg,rgba(7,24,43,.16),rgba(7,24,43,.55)),u
 @media (prefers-contrast: more) { body { background:#0b2636 !important; } }
 @media (forced-colors: active) { body { background:Canvas !important; color:CanvasText !important; } }
 }
+
+/*
+ * Claude's dusk/dawn new-tab artwork, translated to Firefox Activity Stream.
+ * Native search, Firefox top sites, and all browser permissions remain intact.
+ */
+@-moz-document url("about:newtab"), url("about:home") {
+  :root {
+    --lp-bg: #121822;
+    --lp-card: #1e2938;
+    --lp-ink: #f2f5f8;
+    --lp-border: #304055;
+    --lp-accent: #36c2db;
+  }
+  body {
+    background: linear-gradient(180deg, rgba(13,20,32,.10) 0%, rgba(13,20,32,.40) 100%),
+      url("vela-dusk.svg") center bottom / 100% auto no-repeat,
+      linear-gradient(180deg,#1a2332 0%,#121822 65%) !important;
+    background-attachment: fixed !important;
+    color: var(--lp-ink) !important;
+  }
+  .search-wrapper .search-inner-wrapper {
+    width: min(850px, 88vw) !important;
+    max-width: 100% !important;
+    height: 62px !important;
+  }
+  .search-wrapper .search-handoff-button,
+  content-search-handoff-ui {
+    border-radius: 18px !important;
+    min-height: 58px !important;
+    background: color-mix(in srgb,var(--lp-card) 87%,transparent) !important;
+    box-shadow: inset 0 0 0 1px var(--lp-border), 0 12px 28px #0003 !important;
+  }
+  .logo-and-wordmark-wrapper .logo-and-wordmark .logo {
+    background-image: url("vela.svg") !important;
+    width: 92px !important;
+    height: 92px !important;
+  }
+  .logo-and-wordmark-wrapper .logo-and-wordmark::after {
+    content: "Vela";
+    font-family: "Google Sans Flex", system-ui, sans-serif;
+    font-size: 44px !important;
+    font-weight: 550 !important;
+    letter-spacing: -.035em;
+  }
+  .top-site-outer .tile {
+    background: color-mix(in srgb,var(--lp-card) 92%,transparent) !important;
+    border: 1px solid color-mix(in srgb,var(--lp-ink) 10%,transparent) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+  .top-site-outer:hover .tile { background: #26394c !important; }
+  .top-site-outer .title { font-weight: 500 !important; }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --lp-bg:#f3f4f6;
+      --lp-card:#fff;
+      --lp-ink:#1b1f24;
+      --lp-border:#cbd4df;
+      --lp-accent:#0b7f97;
+    }
+    body {
+      background: linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(245,247,250,.12) 100%),
+        url("vela-dawn.svg") center bottom / 100% auto no-repeat,
+        linear-gradient(180deg,#e6ecf3,#f3f4f6) !important;
+    }
+    .top-site-outer:hover .tile { background:#fff !important; }
+    .top-site-outer .title { color:#263544 !important; }
+  }
+  @media (prefers-contrast: more) { body { background:var(--lp-bg) !important; } }
+  @media (forced-colors: active) { body { background:Canvas !important; color:CanvasText !important; } }
+}
