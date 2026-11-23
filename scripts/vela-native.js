@@ -10,6 +10,13 @@
     if (!toolbox) return;
     if (document.getElementById("vela-native-rail")) return;
     const Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs").Services;
+    // Zen itself manages right-side positioning and compact-mode hover.
+    // Do not manually reorder #navigator-toolbox or move tabbrowser-tabs.
+    // The setting belongs to the Vela browser profile.
+    if (!Services.prefs.getBoolPref("zen.tabs.vertical.right-side", false)) {
+      Services.prefs.setBoolPref("zen.tabs.vertical.right-side", true);
+    }
+    root.setAttribute("vela-tools-right", "true");
     const rail = document.createXULElement("vbox");
     rail.id = "vela-native-rail";
     rail.setAttribute("aria-label", "Vela browser tools");
@@ -211,7 +218,7 @@
       });
     }
     renderSites();
-    // Put tools in the sidebar Zen already opens, never in a second panel.
+    // Put tools inside Zen's right-hand sidebar; do not create a second panel.
     toolbox.append(rail);
     // Mirror only the tab controls. Firefox keeps ownership of the real tabs.
     // Moving tabbrowser-tabs out of Zen breaks its custom element and hid every tab.
@@ -328,6 +335,9 @@
     scheduleTabs();
     // This is the existing Zen sidebar. No separate Tools drawer is created.
     root.setAttribute("vela-sidebar-ready", "true");
+    // Firefox tabs stay mounted for keyboard shortcuts, session restore and
+    // extensions. CSS hides only their vertical presentation; the top strip
+    // continues to switch, create and close actual Firefox tabs.
     const roles = {
       page:"base", surface:"surface", raised:"raised", text:"text",
       muted:"muted", accent:"accent", border:"border"
