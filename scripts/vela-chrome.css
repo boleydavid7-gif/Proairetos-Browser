@@ -190,3 +190,17 @@
   #vela-native-rail toolbarbutton { transition: background-color 150ms ease, color 150ms ease; }
 }
 :root:is([inDOMFullscreen="true"],[popup-window]) #vela-top-tabs { display: none !important; }
+
+/* New tabs are created from Vela's top strip, not Zen's vertical sidebar.
+   Scope strictly to the native sidebar; never hide #vela-add-tab. */
+#navigator-toolbox :is(
+  #tabs-newtab-button,
+  #new-tab-button,
+  #zen-newtab-button,
+  #zen-new-tab-button
+) {
+  display: none !important;
+}
+#navigator-toolbox #tabbrowser-arrowscrollbox-periphery > #tabs-newtab-button {
+  display: none !important;
+}
