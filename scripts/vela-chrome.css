@@ -130,13 +130,13 @@
 }
 
 /* Vela sidebar: browser tools and pinned websites, not duplicate vertical tabs. */
-#navigator-toolbox #vela-native-rail {
+#vela-native-rail {
   position: relative;
   display: flex !important;
   flex-direction: column !important;
   align-items: stretch !important;
   justify-content: flex-start !important;
-  flex: 0 0 auto;
+  flex: 0 0 var(--vela-sidebar-width, 248px) !important;
   width: var(--vela-sidebar-width, 248px) !important;
   min-width: 190px !important;
   max-width: min(380px, 90vw);
@@ -210,14 +210,36 @@
   cursor: ew-resize;
 }
 #vela-sidebar-resize:hover { background: var(--lamplight-accent); opacity: .3; }
-:root[vela-tools-collapsed="true"] #navigator-toolbox #vela-native-rail { display: none !important; }
+:root[vela-tools-collapsed="true"] #vela-native-rail { display: none !important; }
 #vela-native-rail :is(toolbarbutton, box):focus-visible {
   outline: 2px solid var(--lamplight-accent) !important;
   outline-offset: -2px;
 }
 
-:root[vela-sidebar-ready="true"]:not([vela-tools-collapsed="true"]) #navigator-toolbox #vela-native-rail { display: flex !important; visibility: visible !important; }
+:root[vela-sidebar-ready="true"]:not([vela-tools-collapsed="true"]) #vela-native-rail { display: flex !important; visibility: visible !important; }
 #vela-native-rail .vela-site-open .toolbarbutton-text { display: -moz-box !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #vela-native-rail toolbarbutton { appearance: none; border: 0; background: transparent; color: var(--lamplight-text); border-radius: 8px; }
 #vela-native-rail toolbarbutton:hover { background: var(--lamplight-raised); }
 #vela-native-rail toolbarbutton:focus-visible { outline: 2px solid var(--lamplight-accent); outline-offset: -2px; }
+
+/* The tools panel is a sibling of browser chrome, never a child of the toolbar. */
+#zen-main-app-wrapper:has(> #vela-native-rail),
+#browser:has(> #vela-native-rail) {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+}
+#zen-main-app-wrapper > #vela-native-rail,
+#browser > #vela-native-rail {
+  align-self: stretch !important;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-top: 0;
+  border-inline-end: 1px solid var(--lamplight-border);
+  margin: 0 !important;
+}
+#vela-sidebar-heading { justify-content: space-between; }
+#vela-sidebar-close { min-width: 28px; min-height: 28px; font-size: 17px; }
+:root[vela-tools-collapsed="true"] #vela-native-rail { display: none !important; }
