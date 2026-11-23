@@ -140,3 +140,35 @@
   --arrowpanel-border-color: var(--lamplight-border) !important;
 }
 :root:is([inDOMFullscreen="true"],[popup-window]) #vela-top-tabs { display:none !important; }
+
+/* Honor the OS appearance when running outside a ProairetOS session. */
+@media (prefers-color-scheme: light) {
+  :root:not([vela-desktop-palette="true"]) {
+    --lamplight-base: #f4f6f8;
+    --lamplight-surface: #ffffff;
+    --lamplight-raised: #e6ebef;
+    --lamplight-text: #172b36;
+    --lamplight-muted: #596e79;
+    --lamplight-accent: #087c93;
+    --lamplight-border: #d0dbe1;
+  }
+}
+/* The horizontal strip must not inherit Zen's vertical-tab sizing. */
+:root[vela-top-tabs="true"] #vela-top-tabs #tabbrowser-tabs .tabbrowser-tab[fadein] {
+  position: relative !important;
+  max-height: 34px !important;
+}
+:root[vela-top-tabs="true"] #vela-top-tabs #tabbrowser-tabs .tab-label-container {
+  min-width: 0 !important;
+}
+#vela-tools-toggle:focus-visible, #vela-add-tab:focus-visible {
+  outline: 2px solid var(--lamplight-accent) !important;
+  outline-offset: -2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  #vela-top-tabs .tab-background,
+  #vela-tools-toggle,
+  #vela-add-tab {
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+  }
+}
