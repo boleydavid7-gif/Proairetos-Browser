@@ -12,50 +12,6 @@
 :root:not([privatebrowsingmode="temporary"],[popup-window]) .urlbarView-row-inner { border-radius:8px !important; }
 @media (prefers-reduced-motion:no-preference) { #nav-bar toolbarbutton, .subviewbutton { transition:background-color 160ms ease,color 160ms ease; } }
 
-#vela-native-rail { margin:8px 6px; padding:8px 0; border-top:1px solid var(--lamplight-border); gap:3px; }
-#vela-native-rail .vela-rail-heading { font-size:12px; font-weight:600; color:var(--lamplight-muted); margin:4px 10px; }
-#vela-native-rail toolbarbutton { min-height:32px; padding-inline:10px; border-radius:8px; color:var(--lamplight-text); }
-#vela-native-rail toolbarbutton:hover { background:var(--lamplight-raised); }
-:root[zen-compact-mode="true"] #vela-native-rail, #navigator-toolbox:not([zen-sidebar-expanded="true"]) #vela-native-rail { display:none; }
-
-:root:not([privatebrowsingmode="temporary"],[popup-window],[zen-compact-mode="true"]) #navigator-toolbox[zen-sidebar-expanded="true"] {
-  --zen-toolbox-min-width:248px !important;
-  --zen-toolbox-padding:12px;
-}
-#navigator-toolbox[zen-sidebar-expanded="true"] #vela-native-rail {
-  margin:8px 4px; padding:12px 2px 4px; gap:4px;
-  border-top:1px solid var(--lamplight-border);
-}
-#vela-native-rail .vela-rail-heading {
-  font-size:20px; font-weight:600; letter-spacing:-.5px;
-  color:var(--lamplight-text); margin:4px 8px 10px;
-}
-#vela-native-rail toolbarbutton {
-  appearance:none; min-height:36px; padding:6px 12px;
-  border-radius:8px; background:transparent; border:0;
-  text-align:start; justify-content:start;
-}
-#vela-native-rail toolbarbutton:hover { background:var(--lamplight-raised); }
-#vela-native-rail toolbarbutton:focus-visible { outline:2px solid var(--lamplight-accent); outline-offset:-2px; }
-#navigator-toolbox[zen-sidebar-expanded="true"] .zen-current-workspace-indicator {
-  background:transparent !important; border:1px solid var(--lamplight-border);
-  min-height:38px; margin-block:8px !important;
-}
-#navigator-toolbox[zen-sidebar-expanded="true"] .tabbrowser-tab:not([zen-essential="true"]) .tab-background { border-radius:8px !important; }
-#navigator-toolbox[zen-sidebar-expanded="true"] #tabbrowser-arrowscrollbox-periphery > toolbarbutton { background:transparent; margin-inline:4px; }
-@media(prefers-reduced-motion:no-preference) { #vela-native-rail toolbarbutton { transition:background-color 160ms ease; } }
-
-#navigator-toolbox[zen-sidebar-expanded="true"] #vela-native-rail { display:flex; flex-direction:row; justify-content:space-evenly; align-items:center; margin:5px 8px 9px; padding:7px 0 0; gap:4px; }
-#vela-native-rail .vela-rail-heading { display:none; }
-#vela-native-rail toolbarbutton { flex:1; min-width:0; min-height:36px; padding:6px; justify-content:center; align-items:center; }
-#vela-native-rail toolbarbutton .toolbarbutton-text { font-size:0; margin:0; padding:0; }
-#vela-native-rail toolbarbutton::before { content:""; display:block; width:19px; height:19px; background:currentColor; mask-size:contain; mask-repeat:no-repeat; mask-position:center; }
-#vela-native-rail toolbarbutton:nth-of-type(1)::before { mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228%22%2F%3E%3Cpath%20d%3D%22M12%207v5l3%202%22%2F%3E%3C%2Fsvg%3E"); }
-#vela-native-rail toolbarbutton:nth-of-type(2)::before { mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%204h12v16l-6-4-6%204z%22%2F%3E%3C%2Fsvg%3E"); }
-#vela-native-rail toolbarbutton:nth-of-type(3)::before { mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203v12m-5-5%205%205%205-5M5%2017v4h14v-4%22%2F%3E%3C%2Fsvg%3E"); }
-#navigator-toolbox[zen-sidebar-expanded="true"] .zen-current-workspace-indicator { border:0 !important; background:var(--lamplight-surface) !important; border-radius:8px !important; margin-inline:8px !important; }
-
-
 /* Vela's real tab container is relocated, not duplicated. */
 :root {
   --lamplight-base: #0b2432;
@@ -174,7 +130,7 @@
 }
 
 /* Vela sidebar: browser tools and pinned websites, not duplicate vertical tabs. */
-:root:not([zen-compact-mode="true"]) #navigator-toolbox[zen-sidebar-expanded="true"] #vela-native-rail {
+#navigator-toolbox #vela-native-rail {
   position: relative;
   display: flex !important;
   flex-direction: column !important;
@@ -182,6 +138,7 @@
   justify-content: flex-start !important;
   flex: 0 0 auto;
   width: var(--vela-sidebar-width, 248px) !important;
+  min-width: 190px !important;
   max-width: min(380px, 90vw);
   box-sizing: border-box;
   margin: 8px 0 !important;
@@ -258,3 +215,9 @@
   outline: 2px solid var(--lamplight-accent) !important;
   outline-offset: -2px;
 }
+
+:root[vela-sidebar-ready="true"]:not([vela-tools-collapsed="true"]) #navigator-toolbox #vela-native-rail { display: flex !important; visibility: visible !important; }
+#vela-native-rail .vela-site-open .toolbarbutton-text { display: -moz-box !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#vela-native-rail toolbarbutton { appearance: none; border: 0; background: transparent; color: var(--lamplight-text); border-radius: 8px; }
+#vela-native-rail toolbarbutton:hover { background: var(--lamplight-raised); }
+#vela-native-rail toolbarbutton:focus-visible { outline: 2px solid var(--lamplight-accent); outline-offset: -2px; }
