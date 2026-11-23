@@ -1,18 +1,4 @@
-:root:not([privatebrowsingmode="temporary"],[popup-window]) {
---arrowpanel-background:var(--lamplight-surface, #102f40) !important;
---arrowpanel-color:var(--lamplight-text,#edf5fa) !important;
---arrowpanel-border-color:var(--lamplight-border,#28495b) !important;
---arrowpanel-border-radius:12px !important;
---panel-border-radius:12px !important;
---toolbarbutton-border-radius:8px !important;
-}
-:root:not([privatebrowsingmode="temporary"],[popup-window],[zen-compact-mode="true"]) #navigator-toolbox[zen-sidebar-expanded="true"] .zen-current-workspace-indicator { margin-inline:6px !important; padding:10px !important; border-radius:8px !important; }
-:root:not([privatebrowsingmode="temporary"],[popup-window]) #nav-bar { --toolbarbutton-padding-inner:9px; }
-:root:not([privatebrowsingmode="temporary"],[popup-window]) #urlbar .urlbar-background { border-radius:12px !important; }
-:root:not([privatebrowsingmode="temporary"],[popup-window]) .urlbarView-row-inner { border-radius:8px !important; }
-@media (prefers-reduced-motion:no-preference) { #nav-bar toolbarbutton, .subviewbutton { transition:background-color 160ms ease,color 160ms ease; } }
-
-/* Vela's real tab container is relocated, not duplicated. */
+/* Vela browser chrome: system Lamplight palette is set by vela-native.js. */
 :root {
   --lamplight-base: #0b2432;
   --lamplight-surface: #102f40;
@@ -22,71 +8,6 @@
   --lamplight-accent: #49c8d6;
   --lamplight-border: #28495b;
 }
-#vela-top-tabs {
-  display: flex !important;
-  min-height: 39px;
-  max-height: 44px;
-  align-items: stretch;
-  gap: 5px;
-  padding: 3px 10px;
-  background: var(--lamplight-base) !important;
-  color: var(--lamplight-text) !important;
-}
-#vela-top-tabs #tabbrowser-tabs {
-  display: flex !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  width: auto !important;
-  max-width: none !important;
-  height: 36px !important;
-  max-height: 36px !important;
-  flex-direction: row !important;
-}
-#vela-top-tabs #tabbrowser-arrowscrollbox,
-#vela-top-tabs #tabbrowser-arrowscrollbox > scrollbox,
-#vela-top-tabs .arrowscrollbox-scrollbox {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch !important;
-  min-width: 0 !important;
-}
-#vela-top-tabs .tabbrowser-tab {
-  display: flex !important;
-  flex: 0 1 210px !important;
-  width: 210px !important;
-  min-width: 90px !important;
-  max-width: 240px !important;
-  height: 34px !important;
-  min-height: 34px !important;
-  margin: 0 2px !important;
-}
-#vela-top-tabs .tabbrowser-tab .tab-stack,
-#vela-top-tabs .tabbrowser-tab .tab-content { width: 100% !important; min-width: 0 !important; }
-#vela-top-tabs .tabbrowser-tab .tab-background {
-  border-radius: 8px !important;
-  background: var(--lamplight-surface) !important;
-}
-#vela-top-tabs .tabbrowser-tab[selected] .tab-background {
-  background: var(--lamplight-raised) !important;
-  box-shadow: inset 0 -2px var(--lamplight-accent) !important;
-}
-#vela-add-tab, #vela-tools-toggle {
-  appearance: none;
-  min-width: 32px;
-  min-height: 32px;
-  padding: 5px;
-  border-radius: 8px;
-  color: var(--lamplight-text);
-}
-#vela-add-tab:hover, #vela-tools-toggle:hover { background: var(--lamplight-raised); }
-#vela-tools-toggle { margin: 4px 10px; }
-:root[vela-tools-collapsed="true"] #vela-native-rail { display: none !important; }
-:root[vela-tools-collapsed="true"] #vela-tools-toggle { background: var(--lamplight-raised); }
-:root[vela-top-tabs="true"] #navigator-toolbox #tabbrowser-tabs { visibility: visible !important; }
-:root[vela-desktop-palette="true"] :is(#zen-main-app-wrapper,#zen-appcontent-navbar-wrapper,#nav-bar,#navigator-toolbox,#vela-top-tabs) {
-  background: var(--lamplight-base) !important;
-  color: var(--lamplight-text) !important;
-}
 :root[vela-desktop-palette="true"] {
   --toolbarbutton-hover-background: var(--lamplight-raised) !important;
   --toolbar-field-background-color: var(--lamplight-raised) !important;
@@ -95,9 +16,164 @@
   --arrowpanel-color: var(--lamplight-text) !important;
   --arrowpanel-border-color: var(--lamplight-border) !important;
 }
-:root:is([inDOMFullscreen="true"],[popup-window]) #vela-top-tabs { display:none !important; }
+:root[vela-desktop-palette="true"] :is(#zen-main-app-wrapper,#zen-appcontent-navbar-wrapper,#nav-bar,#navigator-toolbox,#vela-top-tabs) {
+  background-color: var(--lamplight-base) !important;
+  color: var(--lamplight-text) !important;
+}
+:root:not([privatebrowsingmode="temporary"],[popup-window]) {
+  --arrowpanel-border-radius: 12px !important;
+  --panel-border-radius: 12px !important;
+  --toolbarbutton-border-radius: 8px !important;
+}
+:root:not([privatebrowsingmode="temporary"],[popup-window]) #urlbar .urlbar-background { border-radius: 12px !important; }
+:root:not([privatebrowsingmode="temporary"],[popup-window]) .urlbarView-row-inner { border-radius: 8px !important; }
 
-/* Honor the OS appearance when running outside a ProairetOS session. */
+/* A top strip that does not alter Firefox's original tab container. */
+#vela-top-tabs {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
+  padding: 4px 10px;
+  gap: 6px;
+  align-items: stretch;
+  min-width: 0;
+  background: var(--lamplight-base) !important;
+  color: var(--lamplight-text) !important;
+  box-sizing: border-box;
+}
+#vela-top-tab-items {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  gap: 4px;
+}
+#vela-top-tab-items .vela-tab-item {
+  display: flex !important;
+  align-items: center !important;
+  flex: 0 0 168px !important;
+  max-width: 220px;
+  min-width: 94px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--lamplight-surface);
+  color: var(--lamplight-muted);
+}
+#vela-top-tab-items .vela-tab-item[selected="true"] {
+  background: var(--lamplight-raised);
+  color: var(--lamplight-text);
+  box-shadow: inset 0 -2px var(--lamplight-accent);
+}
+#vela-top-tab-items .vela-tab-select {
+  appearance: none;
+  min-width: 0;
+  flex: 1 1 auto;
+  width: 0;
+  padding: 5px 10px;
+  color: inherit;
+}
+#vela-top-tab-items .vela-tab-select .toolbarbutton-text {
+  display: -moz-box !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#vela-top-tab-items .vela-tab-close {
+  appearance: none;
+  flex: 0 0 26px;
+  min-width: 26px;
+  padding: 4px;
+  border-radius: 6px;
+  color: inherit;
+}
+#vela-top-tab-items .vela-tab-close:hover, #vela-add-tab:hover { background: var(--lamplight-raised); }
+#vela-add-tab {
+  appearance: none;
+  flex: 0 0 32px;
+  min-width: 32px;
+  border-radius: 8px;
+  color: var(--lamplight-text);
+}
+
+/* Vela tools belong INSIDE Zen's automatically opened sidebar. */
+#navigator-toolbox #vela-native-rail {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 10px 6px 8px !important;
+  padding: 10px 4px 8px !important;
+  border-top: 1px solid var(--lamplight-border);
+  gap: 4px;
+  background: transparent;
+  color: var(--lamplight-text);
+  overflow: hidden;
+}
+#vela-sidebar-heading { display: flex !important; align-items: center; min-height: 28px; margin-bottom: 4px; }
+#vela-sidebar-heading .vela-rail-heading {
+  display: flex !important;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 8px !important;
+  color: var(--lamplight-text);
+}
+#vela-sidebar-actions, #vela-pinned-sites { display: flex !important; flex-direction: column !important; gap: 3px; min-width: 0; }
+#navigator-toolbox #vela-native-rail toolbarbutton {
+  appearance: none;
+  min-height: 34px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--lamplight-text);
+  text-align: start;
+}
+#navigator-toolbox #vela-native-rail toolbarbutton:hover { background: var(--lamplight-raised); }
+#navigator-toolbox #vela-native-rail toolbarbutton:focus-visible,
+#vela-top-tabs toolbarbutton:focus-visible {
+  outline: 2px solid var(--lamplight-accent) !important;
+  outline-offset: -2px;
+}
+#navigator-toolbox #vela-native-rail .vela-sidebar-action {
+  display: flex !important;
+  width: 100%;
+  flex: 0 0 auto;
+  justify-content: flex-start;
+}
+#navigator-toolbox #vela-native-rail .vela-sidebar-action .toolbarbutton-text {
+  display: -moz-box !important;
+  font-size: 13px !important;
+}
+#vela-sites-heading { display: flex !important; align-items: center; margin: 10px 5px 2px; }
+#vela-sites-heading label { flex: 1; color: var(--lamplight-muted); font-size: 12px; font-weight: 600; }
+#navigator-toolbox #vela-native-rail #vela-pin-site { min-width: 28px; padding: 2px; }
+#vela-sites-empty { font-size: 12px; color: var(--lamplight-muted); padding: 9px 10px; }
+#vela-native-rail .vela-site-row { display: flex !important; align-items: center; min-width: 0; }
+#vela-native-rail .vela-site-open {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#vela-native-rail .vela-site-open .toolbarbutton-text {
+  display: -moz-box !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#vela-native-rail .vela-site-remove { flex: 0 0 26px; min-width: 26px; padding: 2px; }
+#vela-native-rail .vela-site-row:hover { border-radius: 8px; background: var(--lamplight-surface); }
+/* Disable the old resize affordance: sizing is managed by Zen's sidebar itself. */
+#vela-sidebar-resize { display: none !important; }
 @media (prefers-color-scheme: light) {
   :root:not([vela-desktop-palette="true"]) {
     --lamplight-base: #f4f6f8;
@@ -109,137 +185,8 @@
     --lamplight-border: #d0dbe1;
   }
 }
-/* The horizontal strip must not inherit Zen's vertical-tab sizing. */
-:root[vela-top-tabs="true"] #vela-top-tabs #tabbrowser-tabs .tabbrowser-tab[fadein] {
-  position: relative !important;
-  max-height: 34px !important;
-}
-:root[vela-top-tabs="true"] #vela-top-tabs #tabbrowser-tabs .tab-label-container {
-  min-width: 0 !important;
-}
-#vela-tools-toggle:focus-visible, #vela-add-tab:focus-visible {
-  outline: 2px solid var(--lamplight-accent) !important;
-  outline-offset: -2px;
-}
 @media (prefers-reduced-motion: no-preference) {
-  #vela-top-tabs .tab-background,
-  #vela-tools-toggle,
-  #vela-add-tab {
-    transition: background-color 150ms ease, box-shadow 150ms ease;
-  }
+  #vela-top-tabs .vela-tab-item,
+  #vela-native-rail toolbarbutton { transition: background-color 150ms ease, color 150ms ease; }
 }
-
-/* Vela sidebar: browser tools and pinned websites, not duplicate vertical tabs. */
-#vela-native-rail {
-  position: relative;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  justify-content: flex-start !important;
-  flex: 0 0 var(--vela-sidebar-width, 248px) !important;
-  width: var(--vela-sidebar-width, 248px) !important;
-  min-width: 190px !important;
-  max-width: min(380px, 90vw);
-  box-sizing: border-box;
-  margin: 8px 0 !important;
-  padding: 12px 12px 18px !important;
-  gap: 6px !important;
-  overflow: visible;
-  background: var(--lamplight-base);
-  border-top: 1px solid var(--lamplight-border);
-}
-#vela-sidebar-heading { align-items: center; min-height: 30px; margin-bottom: 4px; }
-#vela-sidebar-heading .vela-rail-heading {
-  display: flex !important;
-  margin: 0 4px !important;
-  font-size: 15px !important;
-  font-weight: 600;
-  color: var(--lamplight-text);
-}
-#vela-sidebar-actions { display: flex; flex-direction: column; gap: 3px; }
-#vela-native-rail .vela-sidebar-action {
-  flex: 0 0 auto !important;
-  width: 100%;
-  min-height: 36px;
-  justify-content: flex-start !important;
-  padding: 7px 10px !important;
-  border-radius: 8px;
-  text-align: start;
-}
-#vela-native-rail .vela-sidebar-action .toolbarbutton-text {
-  display: flex !important;
-  font-size: 13px !important;
-}
-#vela-native-rail .vela-sidebar-action::before { display: none !important; }
-#vela-sites-heading { display: flex; align-items: center; margin: 14px 4px 4px; }
-#vela-sites-heading label { flex: 1; font-size: 12px; font-weight: 600; color: var(--lamplight-muted); }
-#vela-pin-site {
-  appearance: none;
-  min-width: 28px;
-  min-height: 28px;
-  border-radius: 7px;
-  color: var(--lamplight-text);
-}
-#vela-pin-site:hover { background: var(--lamplight-raised); }
-#vela-pinned-sites { display: flex; flex-direction: column; gap: 2px; }
-#vela-sites-empty { font-size: 12px; color: var(--lamplight-muted); padding: 9px 10px; }
-#vela-native-rail .vela-site-row { display: flex; align-items: center; gap: 2px; min-width: 0; }
-#vela-native-rail .vela-site-open {
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 34px;
-  justify-content: flex-start;
-  padding: 6px 9px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-#vela-native-rail .vela-site-remove {
-  flex: 0 0 26px;
-  min-width: 26px;
-  min-height: 30px;
-  opacity: .65;
-}
-#vela-native-rail .vela-site-remove:hover { opacity: 1; }
-#vela-native-rail .vela-site-row:hover { background: var(--lamplight-raised); border-radius: 8px; }
-#vela-sidebar-resize {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  inset-inline-end: -4px;
-  width: 8px;
-  cursor: ew-resize;
-}
-#vela-sidebar-resize:hover { background: var(--lamplight-accent); opacity: .3; }
-:root[vela-tools-collapsed="true"] #vela-native-rail { display: none !important; }
-#vela-native-rail :is(toolbarbutton, box):focus-visible {
-  outline: 2px solid var(--lamplight-accent) !important;
-  outline-offset: -2px;
-}
-
-:root[vela-sidebar-ready="true"]:not([vela-tools-collapsed="true"]) #vela-native-rail { display: flex !important; visibility: visible !important; }
-#vela-native-rail .vela-site-open .toolbarbutton-text { display: -moz-box !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#vela-native-rail toolbarbutton { appearance: none; border: 0; background: transparent; color: var(--lamplight-text); border-radius: 8px; }
-#vela-native-rail toolbarbutton:hover { background: var(--lamplight-raised); }
-#vela-native-rail toolbarbutton:focus-visible { outline: 2px solid var(--lamplight-accent); outline-offset: -2px; }
-
-/* The tools panel is a sibling of browser chrome, never a child of the toolbar. */
-#zen-main-app-wrapper:has(> #vela-native-rail),
-#browser:has(> #vela-native-rail) {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: stretch !important;
-}
-#zen-main-app-wrapper > #vela-native-rail,
-#browser > #vela-native-rail {
-  align-self: stretch !important;
-  min-height: 0;
-  max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-top: 0;
-  border-inline-end: 1px solid var(--lamplight-border);
-  margin: 0 !important;
-}
-#vela-sidebar-heading { justify-content: space-between; }
-#vela-sidebar-close { min-width: 28px; min-height: 28px; font-size: 17px; }
-:root[vela-tools-collapsed="true"] #vela-native-rail { display: none !important; }
+:root:is([inDOMFullscreen="true"],[popup-window]) #vela-top-tabs { display: none !important; }
