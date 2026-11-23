@@ -172,3 +172,89 @@
     transition: background-color 150ms ease, box-shadow 150ms ease;
   }
 }
+
+/* Vela sidebar: browser tools and pinned websites, not duplicate vertical tabs. */
+:root:not([zen-compact-mode="true"]) #navigator-toolbox[zen-sidebar-expanded="true"] #vela-native-rail {
+  position: relative;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  flex: 0 0 auto;
+  width: var(--vela-sidebar-width, 248px) !important;
+  max-width: min(380px, 90vw);
+  box-sizing: border-box;
+  margin: 8px 0 !important;
+  padding: 12px 12px 18px !important;
+  gap: 6px !important;
+  overflow: visible;
+  background: var(--lamplight-base);
+  border-top: 1px solid var(--lamplight-border);
+}
+#vela-sidebar-heading { align-items: center; min-height: 30px; margin-bottom: 4px; }
+#vela-sidebar-heading .vela-rail-heading {
+  display: flex !important;
+  margin: 0 4px !important;
+  font-size: 15px !important;
+  font-weight: 600;
+  color: var(--lamplight-text);
+}
+#vela-sidebar-actions { display: flex; flex-direction: column; gap: 3px; }
+#vela-native-rail .vela-sidebar-action {
+  flex: 0 0 auto !important;
+  width: 100%;
+  min-height: 36px;
+  justify-content: flex-start !important;
+  padding: 7px 10px !important;
+  border-radius: 8px;
+  text-align: start;
+}
+#vela-native-rail .vela-sidebar-action .toolbarbutton-text {
+  display: flex !important;
+  font-size: 13px !important;
+}
+#vela-native-rail .vela-sidebar-action::before { display: none !important; }
+#vela-sites-heading { display: flex; align-items: center; margin: 14px 4px 4px; }
+#vela-sites-heading label { flex: 1; font-size: 12px; font-weight: 600; color: var(--lamplight-muted); }
+#vela-pin-site {
+  appearance: none;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 7px;
+  color: var(--lamplight-text);
+}
+#vela-pin-site:hover { background: var(--lamplight-raised); }
+#vela-pinned-sites { display: flex; flex-direction: column; gap: 2px; }
+#vela-sites-empty { font-size: 12px; color: var(--lamplight-muted); padding: 9px 10px; }
+#vela-native-rail .vela-site-row { display: flex; align-items: center; gap: 2px; min-width: 0; }
+#vela-native-rail .vela-site-open {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 34px;
+  justify-content: flex-start;
+  padding: 6px 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#vela-native-rail .vela-site-remove {
+  flex: 0 0 26px;
+  min-width: 26px;
+  min-height: 30px;
+  opacity: .65;
+}
+#vela-native-rail .vela-site-remove:hover { opacity: 1; }
+#vela-native-rail .vela-site-row:hover { background: var(--lamplight-raised); border-radius: 8px; }
+#vela-sidebar-resize {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-end: -4px;
+  width: 8px;
+  cursor: ew-resize;
+}
+#vela-sidebar-resize:hover { background: var(--lamplight-accent); opacity: .3; }
+:root[vela-tools-collapsed="true"] #navigator-toolbox #vela-native-rail { display: none !important; }
+#vela-native-rail :is(toolbarbutton, box):focus-visible {
+  outline: 2px solid var(--lamplight-accent) !important;
+  outline-offset: -2px;
+}
