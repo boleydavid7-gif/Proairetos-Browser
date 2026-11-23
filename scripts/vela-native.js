@@ -1,7 +1,7 @@
 /* Loaded only in the privileged browser window, never in web content. */
 (() => {
   "use strict";
-  window.addEventListener("load", () => {
+  function initialize() {
     const root = document.documentElement;
     if (root.getAttribute("windowtype") !== "navigator:browser" ||
         window.arguments?.[0] === "about:privatebrowsing" ||
