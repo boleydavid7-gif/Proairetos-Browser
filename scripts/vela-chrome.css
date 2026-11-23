@@ -455,3 +455,58 @@
 @media (prefers-reduced-motion: reduce) {
   #vela-native-rail *, #vela-top-tabs *, #vela-top-tab-items * { transition: none !important; }
 }
+
+/* Vela navigation is the RIGHT Zen sidebar; tabs exist only in #vela-top-tabs.
+ * Zen's own right-side preference positions #navigator-toolbox correctly.
+ * Never move, delete, or reparent the real Firefox tab elements: gBrowser,
+ * extensions, tab keyboard shortcuts and session restore need them.
+ */
+:root[vela-sidebar-ready="true"][vela-tools-right="true"]
+  #navigator-toolbox :is(
+    #zen-browser-tabs-wrapper,
+    #zen-browser-tabs-container,
+    #zen-tabs-wrapper,
+    #tabbrowser-tabs,
+    #zen-essentials-container,
+    #vertical-pinned-tabs-container,
+    #zen-create-new-button,
+    #zen-workspaces-button,
+    .zen-workspace-tabs-section
+  ) {
+  display: none !important;
+}
+/* Some Zen layouts keep spacer rows / separators outside the tab container. */
+:root[vela-sidebar-ready="true"][vela-tools-right="true"]
+  #navigator-toolbox :is(
+    #zen-pinned-tabs-wrapper,
+    #zen-tabs-separator,
+    #zen-pinned-tabs-separator,
+    #zen-sidebar-bottom-tab-container
+  ) {
+  display: none !important;
+}
+/* This panel remains browser-owned chrome inside the original Zen toolbox. */
+:root[vela-sidebar-ready="true"][vela-tools-right="true"] 
+  #navigator-toolbox #vela-native-rail {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  width: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-width: thin;
+  margin: 4px 6px 8px !important;
+  border-top: 0 !important;
+  border-inline-start: 1px solid var(--vela-hairline);
+  border-inline-end: 0 !important;
+}
+/* The right side uses Zen's layout, not a second absolutely positioned rail. */
+:root[vela-sidebar-ready="true"][zen-right-side="true"]
+  #navigator-toolbox #vela-native-rail { margin-inline-end: 6px !important; }
+/* The top bar is never part of the right navigation panel. */
+:root[vela-sidebar-ready="true"] #vela-top-tabs {
+  display: flex !important;
+}
+:root[vela-sidebar-ready="true"]:is([inDOMFullscreen="true"],[popup-window])
+  #vela-top-tabs { display: none !important; }
