@@ -182,14 +182,6 @@
     if (document.getElementById("vela-top-tabs")) document.getElementById("vela-top-tabs").append(toolsToggle);
     else toolbox.append(toolsToggle);
     setCollapsed(Services.prefs.getBoolPref("vela.tools.collapsed", false));
-    const keyHandler = event => {
-      if (event.ctrlKey && event.shiftKey && !event.altKey && event.key.toLowerCase() === "b") {
-        event.preventDefault();
-        setCollapsed(root.getAttribute("vela-tools-collapsed") !== "true");
-      }
-    };
-    window.addEventListener("keydown", keyHandler, true);
-    window.addEventListener("unload", () => window.removeEventListener("keydown", keyHandler, true), { once: true });
     const roles = {
       page:"base", surface:"surface", raised:"raised", text:"text",
       muted:"muted", accent:"accent", border:"border"
