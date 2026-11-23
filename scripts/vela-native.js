@@ -20,12 +20,6 @@
     title.className = "vela-rail-heading";
     heading.append(title);
     rail.append(heading);
-    const closeTools = document.createXULElement("toolbarbutton");
-    closeTools.id = "vela-sidebar-close";
-    closeTools.setAttribute("label", "×");
-    closeTools.setAttribute("tooltiptext", "Hide sidebar");
-    closeTools.addEventListener("command", () => setCollapsed(true));
-    heading.append(closeTools);
     const actions = document.createXULElement("vbox");
     actions.id = "vela-sidebar-actions";
     rail.append(actions);
@@ -146,63 +140,71 @@
       window.addEventListener("blur", end, true);
       event.preventDefault();
     });
-    const sidebarHost = document.getElementById("zen-main-app-wrapper") ||
-      document.getElementById("browser") || toolbox.parentNode;
-    sidebarHost.insertBefore(rail, sidebarHost.firstChild);
-    root.setAttribute("vela-sidebar-ready", "true");
-    // Reuse Firefox's actual tab nodes: no mirrored tab state or duplicate events.
-    // Zen may change its toolbar structure between releases, so fail safely.
-    const tabBrowser = document.getElementById("tabbrowser-tabs");
+    // Put tools in the sidebar Zen already opens, never in a second panel.
+    toolbox.append(rail);
+    // Mirror only the tab controls. Firefox keeps ownership of the real tabs.
+    // Moving tabbrowser-tabs out of Zen breaks its custom element and hid every tab.
+    const strip = document.createXULElement("hbox");
+    strip.id = "vela-top-tabs";
+    strip.setAttribute("align", "center");
+    const tabs = document.createXULElement("hbox");
+    tabs.id = "vela-top-tab-items";
+    strip.append(tabs);
+    const add = document.createXULElement("toolbarbutton");
+    add.id = "vela-add-tab";
+    add.setAttribute("label", "+");
+    add.setAttribute("tooltiptext", "New tab");
+    add.addEventListener("command", () => {
+      if (window.BrowserCommands?.openTab) window.BrowserCommands.openTab();
+      else window.gBrowser?.addTrustedTab?.("about:newtab");
+    });
+    strip.append(add);
     const nav = document.getElementById("zen-appcontent-navbar-wrapper");
-    if (tabBrowser && nav && !document.getElementById("vela-top-tabs")) {
-      const originalParent = tabBrowser.parentNode;
-      const originalNext = tabBrowser.nextSibling;
-      const strip = document.createXULElement("hbox");
-      strip.id = "vela-top-tabs";
-      strip.setAttribute("align", "center");
-      const add = document.createXULElement("toolbarbutton");
-      add.id = "vela-add-tab";
-      add.setAttribute("label", "+");
-      add.setAttribute("tooltiptext", "New tab");
-      add.addEventListener("command", () => window.BrowserCommands?.openTab());
-      try {
-        nav.before(strip);
-        strip.append(tabBrowser);
-        tabBrowser.setAttribute("orient", "horizontal");
-        strip.append(add);
-        root.setAttribute("vela-top-tabs", "true");
-        window.addEventListener("unload", () => {
-          if (originalParent?.isConnected) {
-            if (originalNext?.parentNode === originalParent) originalParent.insertBefore(tabBrowser, originalNext);
-            else originalParent.append(tabBrowser);
-          }
-        }, { once: true });
-      } catch (error) {
-        console.error("Vela horizontal tabs unavailable", error);
-        if (originalParent?.isConnected) originalParent.append(tabBrowser);
-        strip.remove();
+    if (nav?.parentNode) nav.before(strip);
+    else toolbox.parentNode?.insertBefore(strip, toolbox);
+    let renderPending = false;
+    function renderTabs() {
+      if (!tabs.isConnected || !window.gBrowser) return;
+      const browser = window.gBrowser;
+      const visible = Array.from(browser.visibleTabs || browser.tabs || []);
+      tabs.replaceChildren();
+      for (const tab of visible) {
+        const item = document.createXULElement("hbox");
+        item.className = "vela-tab-item";
+        if (tab === browser.selectedTab) item.setAttribute("selected", "true");
+        item.setAttribute("tooltiptext", tab.label || "New tab");
+        const select = document.createXULElement("toolbarbutton");
+        select.className = "vela-tab-select";
+        select.setAttribute("label", tab.label || "New tab");
+        select.addEventListener("command", () => { browser.selectedTab = tab; });
+        const close = document.createXULElement("toolbarbutton");
+        close.className = "vela-tab-close";
+        close.setAttribute("label", "×");
+        close.setAttribute("tooltiptext", "Close tab");
+        close.addEventListener("command", () => browser.removeTab(tab));
+        item.append(select, close);
+        tabs.append(item);
       }
     }
-    // Browser tools are independent of the horizontal tab strip.
-    const toolsToggle = document.createXULElement("toolbarbutton");
-    toolsToggle.id = "vela-tools-toggle";
-    toolsToggle.setAttribute("label", "Tools");
-    toolsToggle.setAttribute("tooltiptext", "Show or hide browser tools");
-    toolsToggle.setAttribute("aria-controls", "vela-native-rail");
-    function setCollapsed(collapsed) {
-      root.setAttribute("vela-tools-collapsed", String(collapsed));
-      toolsToggle.setAttribute("aria-expanded", String(!collapsed));
-      Services.prefs.setBoolPref("vela.tools.collapsed", collapsed);
+    function scheduleTabs() {
+      if (renderPending) return;
+      renderPending = true;
+      window.requestAnimationFrame(() => {
+        renderPending = false;
+        renderTabs();
+      });
     }
-    toolsToggle.addEventListener("command", () => setCollapsed(root.getAttribute("vela-tools-collapsed") !== "true"));
-    if (document.getElementById("vela-top-tabs")) document.getElementById("vela-top-tabs").append(toolsToggle);
-    else toolbox.append(toolsToggle);
-    setCollapsed(Services.prefs.getBoolPref("vela.tools.collapsed", false));
+    const tabContainer = window.gBrowser?.tabContainer;
+    const events = ["TabOpen", "TabClose", "TabSelect", "TabMove", "TabAttrModified", "TabHide", "TabShow", "TabPinned", "TabUnpinned"];
+    for (const event of events) tabContainer?.addEventListener(event, scheduleTabs);
     window.addEventListener("unload", () => {
-      root.removeAttribute("vela-sidebar-ready");
-      rail.remove();
-      toolsToggle.remove();
+      for (const event of events) tabContainer?.removeEventListener(event, scheduleTabs);
+      strip.remove();
     }, { once: true });
+    root.setAttribute("vela-top-tabs", "true");
+    scheduleTabs();
+    // This is the existing Zen sidebar. No separate Tools drawer is created.
+    root.setAttribute("vela-sidebar-ready", "true");
     const roles = {
       page:"base", surface:"surface", raised:"raised", text:"text",
       muted:"muted", accent:"accent", border:"border"
