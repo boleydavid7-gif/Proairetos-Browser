@@ -14,6 +14,7 @@ cat > "$profile/user.js" <<'EOF'
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 user_pref("zen.urlbar.replace-newtab", false);
 user_pref("zen.view.use-single-toolbar", false);
+user_pref("zen.tabs.vertical.right-side", true);
 user_pref("browser.newtabpage.enabled", true);
 user_pref("browser.startup.homepage", "about:home");
 user_pref("browser.startup.page", 1);
