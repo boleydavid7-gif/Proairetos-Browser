@@ -7,6 +7,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Script } from 'node:vm';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 
 const root = resolve(import.meta.dirname, '..');
 const read = file => readFileSync(resolve(root, file), 'utf8');
@@ -67,6 +68,13 @@ assert.ok(preview.includes('rm -f "$profile/chrome/userChrome.css"'),
 assert.ok(brand.includes('python3 scripts/brand-vela-ui.py') &&
   brandLocale.includes('ZEN_BROWSER') && brandLocale.includes('convert_locale'),
   'brand visible Zen UI strings as Vela without replacing engine identifiers');
+assert.ok(brandLocale.includes('restore_damaged_locale') &&
+  brandLocale.includes('result.count("\\n")') &&
+  brandLocale.includes('MERGED_FTL_KEYS'),
+  'branding must preserve translation newlines and recover old corrupt settings');
+execFileSync('python3', ['scripts/test-brand-vela-ui.py'], {
+  cwd: root, stdio: 'inherit',
+});
 assert.ok(notices.includes('RobotoSkunk') && notices.includes('matteo-tafuro') &&
   notices.includes('KiKaraage') && notices.includes('MIT License'),
   'upstream community mod attributions and permission notices must be preserved');
