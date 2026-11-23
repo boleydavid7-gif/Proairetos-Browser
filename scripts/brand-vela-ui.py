@@ -119,7 +119,7 @@ def restore_damaged_locale(path: Path, content: str, audit: bool) -> str:
     if not audit:
         backup = path.with_name(path.name + ".vela-damaged-backup")
         if not backup.exists():
-            backup.write_text(content, encoding="utf-8")
+            backup.write_bytes(content.encode("utf-8"))
     print(f"Vela branding: {'would repair' if audit else 'repaired'} broken Fluent file {path}")
     return pristine
 
@@ -158,7 +158,7 @@ def main(argv: list[str] | None = None) -> int:
     audit = "--audit" in (sys.argv[1:] if argv is None else argv)
     changed, repaired = [], 0
     for path in locale_files():
-        original = path.read_text(encoding="utf-8")
+        original = path.read_bytes().decode("utf-8")
         clean = original
         if path.suffix == ".ftl" and is_merged(original):
             clean = restore_damaged_locale(path, original, audit)
@@ -177,14 +177,14 @@ def main(argv: list[str] | None = None) -> int:
         if updated != original:
             changed.append(path)
             if not audit:
-                path.write_text(updated, encoding="utf-8")
+                path.write_bytes(updated.encode("utf-8"))
     for path in launcher_files():
-        original = path.read_text(encoding="utf-8")
+        original = path.read_bytes().decode("utf-8")
         updated = convert_launcher(original)
         if updated != original:
             changed.append(path)
             if not audit:
-                path.write_text(updated, encoding="utf-8")
+                path.write_bytes(updated.encode("utf-8"))
     print(
         f"Vela branding: {'would update' if audit else 'updated'} "
         f"{len(changed)} locale/launcher files; "
