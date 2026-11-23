@@ -75,7 +75,7 @@
     pinForm.hidden = true;
     const urlLabel = document.createXULElement("label");
     urlLabel.setAttribute("value", "Website address");
-    const urlInput = document.createElement("input");
+    const urlInput = document.createElementNS("http://www.w3.org/1999/xhtml", "input");
     urlInput.id = "vela-site-url";
     urlInput.type = "url";
     urlInput.placeholder = "https://example.com";
@@ -83,7 +83,7 @@
     urlInput.spellcheck = false;
     const nameLabel = document.createXULElement("label");
     nameLabel.setAttribute("value", "Name (optional)");
-    const nameInput = document.createElement("input");
+    const nameInput = document.createElementNS("http://www.w3.org/1999/xhtml", "input");
     nameInput.id = "vela-site-name";
     nameInput.placeholder = "Website name";
     nameInput.maxLength = 80;
@@ -261,11 +261,24 @@
         // images are admitted to privileged chrome; never fetch arbitrary URLs.
         if (/^(?:chrome:|resource:|page-icon:|data:image\/)/i.test(faviconUrl)) {
           favicon.setAttribute("src", faviconUrl);
-        } else favicon.setAttribute("src", "chrome://browser/content/vela-logo.svg");
+        } else if (["about:home", "about:newtab", "about:blank"].includes(
+          tab.linkedBrowser?.currentURI?.spec)) {
+          favicon.setAttribute("src", "chrome://browser/content/vela-logo.svg");
+        } else favicon.hidden = true;
         const select = document.createXULElement("toolbarbutton");
         select.className = "vela-tab-select";
         select.setAttribute("label", tab.label || "New tab");
         select.addEventListener("command", () => { browser.selectedTab = tab; });
+        select.setAttribute("aria-selected", String(tab === browser.selectedTab));
+        select.addEventListener("keydown", event => {
+          const index = visible.indexOf(tab);
+          const target = event.key === "ArrowRight" ? (index + 1) % visible.length
+            : event.key === "ArrowLeft" ? (index + visible.length - 1) % visible.length
+            : event.key === "Home" ? 0 : event.key === "End" ? visible.length - 1 : -1;
+          if (target < 0) return;
+          event.preventDefault();
+          browser.selectedTab = visible[target];
+        });
         const close = document.createXULElement("toolbarbutton");
         close.className = "vela-tab-close";
         close.setAttribute("label", "×");
