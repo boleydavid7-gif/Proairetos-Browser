@@ -19,8 +19,8 @@ LOCALE_ROOTS = (
     ENGINE / "toolkit" / "locales",
 )
 ASSIGN = re.compile(r"^(\s*[-.\w][-.\w]*\s*=\s*)(.*)$")
-ZEN_BROWSER = re.compile(r"(?<![\\w./@-])Zen Browser(?![\\w./@-])", re.IGNORECASE)
-ZEN = re.compile(r"(?<![\\w./@-])Zen(?![\\w./@-])", re.IGNORECASE)
+ZEN_BROWSER = re.compile(r"(?<![\w./@-])Zen Browser(?![\w./@-])", re.IGNORECASE)
+ZEN = re.compile(r"(?<![\w./@-])Zen(?![\w./@-])", re.IGNORECASE)
 PLACEABLE = re.compile(r"(\{[^{}]*\})")
 
 
