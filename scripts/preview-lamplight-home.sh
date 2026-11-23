@@ -9,7 +9,9 @@ install -m644 scripts/vela.svg "$profile/chrome/vela.svg"
 install -m644 scripts/vela-landscape.svg "$profile/chrome/vela-landscape.svg"
 install -m644 scripts/vela-dusk.svg "$profile/chrome/vela-dusk.svg"
 install -m644 scripts/vela-dawn.svg "$profile/chrome/vela-dawn.svg"
-install -m644 scripts/vela-chrome.css "$profile/chrome/userChrome.css"
+# Browser chrome styles and curated mods are now embedded in the Vela build
+# through browser.xhtml. Avoid loading them twice via userChrome.css.
+rm -f "$profile/chrome/userChrome.css"
 cat > "$profile/user.js" <<'EOF'
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 user_pref("zen.urlbar.replace-newtab", false);
