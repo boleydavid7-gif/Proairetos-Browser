@@ -18,6 +18,16 @@ const preview = read('scripts/preview-lamplight-home.sh');
 
 new Script(browser, { filename: 'scripts/vela-native.js' });
 assert.ok(browser.includes('toolbox.append(rail)'), 'tools must stay in the existing Zen sidebar');
+assert.ok(browser.includes('zen.tabs.vertical.right-side'), 'Vela must use Zen native right-hand positioning');
+assert.ok(preview.includes('user_pref("zen.tabs.vertical.right-side", true)'),
+  'Vela preview profile must position tools on right before startup');
+assert.ok(chrome.includes('#zen-browser-tabs-container') &&
+  chrome.includes('#tabbrowser-tabs') &&
+  chrome.includes('display: none !important'),
+  'hide Zen vertical tabs without deleting their actual DOM');
+assert.ok(chrome.includes('#navigator-toolbox #vela-native-rail'),
+  'Vela tools must remain in right Zen toolbox');
+assert.ok(chrome.includes('#vela-top-tabs'), 'horizontal top tabs must remain visible');
 assert.ok(!browser.includes('sidebarHost.insertBefore(rail'), 'do not reintroduce the second sidebar');
 assert.ok(!browser.includes('strip.append(tabBrowser)'), 'never move Firefox’s native tab container');
 assert.ok(browser.includes('const continueTabs'), 'continue area is in privileged chrome');
