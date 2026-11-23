@@ -17,6 +17,26 @@
       Services.prefs.setBoolPref("zen.tabs.vertical.right-side", true);
     }
     root.setAttribute("vela-tools-right", "true");
+    // Built-in, CSS-only Zen mod adaptations. Users can disable each
+    // independently in about:config without losing Vela's native layout.
+    const modPrefs = {
+      "vela.mods.findbar": "vela-mod-findbar",
+      "vela.mods.urlbar": "vela-mod-urlbar",
+      "vela.mods.menus": "vela-mod-menus",
+    };
+    const applyMods = () => {
+      for (const [pref, attribute] of Object.entries(modPrefs)) {
+        root.setAttribute(attribute, String(Services.prefs.getBoolPref(pref, true)));
+      }
+    };
+    applyMods();
+    const modsObserver = { observe(_subject, _topic, name) {
+      if (Object.hasOwn(modPrefs, name)) applyMods();
+    } };
+    Services.prefs.addObserver("vela.mods.", modsObserver);
+    window.addEventListener("unload", () => {
+      Services.prefs.removeObserver("vela.mods.", modsObserver);
+    }, { once: true });
     const rail = document.createXULElement("vbox");
     rail.id = "vela-native-rail";
     rail.setAttribute("aria-label", "Vela browser tools");
