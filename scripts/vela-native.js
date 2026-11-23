@@ -75,10 +75,18 @@
       } catch (error) { console.warn("Vela tools preference unavailable", error); }
     });
     toolbox.append(toolsToggle);
+    toolsToggle.setAttribute("aria-controls", "vela-native-rail");
     try {
       const Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs").Services;
       root.setAttribute("vela-tools-collapsed", String(Services.prefs.getBoolPref("vela.tools.collapsed", false)));
     } catch { root.setAttribute("vela-tools-collapsed", "false"); }
+    // Keep the tools visible even if Zen collapses its original tab sidebar.
+    // Expose browser-owned panels rather than duplicating bookmark/history data.
+    const library = document.createXULElement("toolbarbutton");
+    library.setAttribute("label", "Library");
+    library.setAttribute("tooltiptext", "Manage bookmarks, history and downloads");
+    library.addEventListener("command", () => window.PlacesCommandHook?.showPlacesOrganizer?.("AllBookmarks"));
+    rail.append(library);
     const roles = {
       page:"base", surface:"surface", raised:"raised", text:"text",
       muted:"muted", accent:"accent", border:"border"
@@ -108,9 +116,12 @@
           if (!match) throw new Error("Invalid palette");
           values[role] = match[1];
         }
-        root.removeAttribute("vela-palette-warning");\n        root.setAttribute("vela-desktop-palette", "true");
+        root.removeAttribute("vela-palette-warning");
+        root.setAttribute("vela-desktop-palette", "true");
         for (const [role, color] of Object.entries(values)) root.style.setProperty("--lamplight-"+roles[role],color,"important");
-      } catch {
+      } catch (error) {
+        if (!root.hasAttribute("vela-palette-warning")) console.warn("Vela: Lamplight palette unavailable", error);
+        root.setAttribute("vela-palette-warning", "true");
         root.removeAttribute("vela-desktop-palette");
         for (const role of Object.values(roles)) root.style.removeProperty("--lamplight-"+role);
       } finally { busy = false; }
@@ -118,5 +129,7 @@
     refresh();
     const timer = window.setInterval(refresh, 2500);
     window.addEventListener("unload", () => window.clearInterval(timer), {once:true});
-  }, {once:true});
+  }
+  if (document.readyState === "complete") initialize();
+  else window.addEventListener("load", initialize, { once: true });
 })();
