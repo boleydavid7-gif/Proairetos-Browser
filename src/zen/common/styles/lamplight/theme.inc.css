@@ -1,0 +1,48 @@
+/*
+ * Lamplight — ProairetOS Browser
+ * Licensed under MPL-2.0.
+ */
+
+:root {
+  --lamplight-page: light-dark(#edf2f5, #0b2636);
+  --lamplight-surface: light-dark(#f5f8fa, #102f40);
+  --lamplight-raised: light-dark(#ffffff, #173c50);
+  --lamplight-text: light-dark(#172e3d, #edf5fa);
+  --lamplight-muted: light-dark(#546b7b, #a4bdcc);
+  --lamplight-border: light-dark(#d5e0e7, #28495b);
+  --lamplight-accent: AccentColor;
+}
+
+#main-window[windowtype="navigator:browser"]:not([zen-private-window="true"]) {
+  --zen-branding-dark: #0b2636;
+  --zen-branding-paper: #edf2f5;
+
+  --zen-border-radius: 10px;
+  --zen-background-opacity: 1;
+  --zen-primary-color: var(--lamplight-accent);
+
+  --zen-main-browser-background: var(--lamplight-page);
+  --zen-main-browser-background-toolbar: var(--lamplight-page);
+  --zen-themed-toolbar-bg-transparent: var(--lamplight-page);
+
+  --zen-colors-primary: var(--lamplight-accent);
+  --zen-colors-secondary: var(--lamplight-raised);
+  --zen-colors-tertiary: var(--lamplight-surface);
+  --zen-colors-border: var(--lamplight-border);
+  --zen-colors-input-bg: var(--lamplight-raised);
+
+  --zen-urlbar-background: var(--lamplight-raised);
+  --toolbar-field-background-color: var(--lamplight-raised) !important;
+  --toolbar-field-focus-background-color: var(--lamplight-raised) !important;
+
+  --toolbox-textcolor: var(--lamplight-text) !important;
+  --toolbar-color: var(--lamplight-text) !important;
+
+  --toolbar-background-color: var(--lamplight-page);
+  --arrowpanel-background: var(--lamplight-surface) !important;
+  --toolbarbutton-border-radius: 8px;
+  --button-border-radius: 8px;
+
+  font-family: system-ui, sans-serif;
+  background-color: var(--lamplight-page);
+}
