@@ -99,6 +99,11 @@ for (const [kind, brandInfo] of Object.entries(surfer.brands)) {
     assert.ok(!/\bZen\b/.test(brandInfo[key]), `${kind} ${key} still says Zen`);
   }
 }
+// Updates never reach Zen's server; on Linux the package updates Vela.
+assert.ok(!JSON.stringify(surfer).includes('zen-browser.app'), 'no Vela build may ask Zen for updates');
+assert.ok(surfer.updateHostname.endsWith('.invalid'), 'the update address never resolves');
+assert.ok(read('configs/linux/mozconfig').includes('--disable-updater'), 'Linux builds have no updater of their own');
+assert.ok(!read('configs/common/mozconfig').includes('zen-browser/desktop'), 'the build names Vela\'s source repository');
 assert.ok(brand.includes('python3 scripts/brand-vela-ui.py') &&
   brandLocale.includes('ZEN_BROWSER') && brandLocale.includes('convert_locale'),
   'brand visible Zen UI strings as Vela without replacing engine identifiers');

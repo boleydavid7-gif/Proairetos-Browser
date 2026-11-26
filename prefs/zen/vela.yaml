@@ -44,3 +44,12 @@
 
 - name: browser.newtabpage.activity-stream.showSponsored
   value: false
+
+# Updates: Linux builds have no updater of their own (configs/linux/mozconfig); the package is updated instead.
+# Every build's update address is a reserved name that never resolves (surfer.json updateHostname), so no Vela
+# build can fetch Zen's updates. About Vela's update links lead to Vela's releases.
+- name: app.update.url.manual
+  value: "https://github.com/boleydavid7-gif/Proairetos-Browser/releases"
+
+- name: app.update.url.details
+  value: "https://github.com/boleydavid7-gif/Proairetos-Browser/releases"

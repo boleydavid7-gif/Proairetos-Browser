@@ -88,6 +88,15 @@ Open `about:config`:
 
 Source inspiration and MIT attributions for the refinements: [VELA_MODS_NOTICES.md](scripts/VELA_MODS_NOTICES.md).
 
+## Updates
+
+On Linux, Vela is updated by its package, the way Ubuntu's and Debian's own Firefox builds are. Its `.deb` updates
+through the ProairetOS update or apt, so Linux builds have no updater of their own (`configs/linux/mozconfig`;
+`VELA_UPDATER=1` keeps it). Every build's update address is a reserved name that never resolves
+(`updateHostname` in `surfer.json`), so no Vela build can fetch Zen's updates. About Vela's update links lead to
+this repository's releases. A Windows or macOS build would need Vela's own signed update files and an update feed
+before it updates itself.
+
 ## Branding: Vela and Zen
 
 The product name, logo, icons and English user-visible strings are **Vela**: `surfer.json` (all build kinds),
