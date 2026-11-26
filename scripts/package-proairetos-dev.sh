@@ -34,7 +34,8 @@ chmod 755 "$pkg/usr/bin/proairetos-browser-dev"
 cat > "$pkg/usr/share/applications/com.proairetos.NativeBrowser.desktop" <<'EOF'
 [Desktop Entry]
 Type=Application
-Name=ProairetOS Browser (Development)
+Name=Vela (Development)
+GenericName=Web Browser
 Exec=proairetos-browser-dev %u
 Icon=com.proairetos.NativeBrowser
 Terminal=false
@@ -47,8 +48,8 @@ Version: $version
 Architecture: amd64
 Maintainer: ProairetOS
 Depends: libgtk-3-0 | libgtk-3-0t64, libdbus-glib-1-2, libnss3, libasound2 | libasound2t64
-Description: ProairetOS Browser development build
- Experimental Zen-derived browser for local testing only.
+Description: Vela browser, development build
+ Vela, the ProairetOS browser, built on Zen and Firefox; for local testing only.
 EOF
 mkdir -p "$root/release"
 out="$root/release/proairetos-browser-dev_${version}_amd64.deb"

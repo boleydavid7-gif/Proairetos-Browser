@@ -1,0 +1,324 @@
+/* Vela's new tab and home page: Firefox's own page (about:home, about:newtab), restyled.
+ * Appended to the new tab page's stylesheets by apply-vela-native.sh, after build-vela-home.py puts the logo and the
+ * wordmark into it as data (@VELA_LOGO@, @VELA_WORDMARK@). The page's content rules allow images but no web fonts,
+ * so the serif "Vela" is a drawing (make-vela-wordmark.py), used as a mask in the text color.
+ * Colors: the Vela palette in light and dark; with vela.theme.colors = "system", the system's scheme and accent. */
+
+:root {
+  --vela-page: light-dark(#efe9dd, #20252d);
+  --vela-glow-warm: light-dark(rgba(240, 168, 48, .22), rgba(230, 170, 110, .22));
+  --vela-glow-cool: light-dark(rgba(120, 140, 160, .16), rgba(110, 130, 160, .18));
+  --vela-card: light-dark(rgba(255, 255, 255, .72), rgba(255, 255, 255, .08));
+  --vela-card-hover: light-dark(#ffffff, rgba(255, 255, 255, .12));
+  --vela-card-border: light-dark(rgba(60, 40, 10, .1), rgba(255, 255, 255, .1));
+  --vela-ink: light-dark(#2a2118, #f3f1ec);
+  --vela-ink-muted: light-dark(#6b5f50, #b4bcc6);
+  --vela-gold: light-dark(#b06d12, #f0a830);
+  --vela-gold-soft: light-dark(rgba(214, 140, 30, .18), rgba(240, 168, 48, .2));
+  --vela-lift: light-dark(0 10px 30px rgba(60, 40, 10, .12), 0 12px 32px rgba(0, 0, 0, .35));
+  --vela-ease: cubic-bezier(.2, .8, .2, 1);
+  --vela-spring: cubic-bezier(.34, 1.4, .5, 1);
+}
+@media -moz-pref("vela.theme.colors", "system") {
+  :root {
+    --vela-page: color-mix(in srgb, Canvas 94%, CanvasText 6%);
+    --vela-glow-warm: color-mix(in srgb, AccentColor 20%, transparent);
+    --vela-glow-cool: color-mix(in srgb, CanvasText 6%, transparent);
+    --vela-card: color-mix(in srgb, CanvasText 6%, transparent);
+    --vela-card-hover: color-mix(in srgb, CanvasText 11%, transparent);
+    --vela-card-border: color-mix(in srgb, CanvasText 10%, transparent);
+    --vela-ink: CanvasText;
+    --vela-ink-muted: color-mix(in srgb, CanvasText 65%, Canvas);
+    --vela-gold: AccentColor;
+    --vela-gold-soft: color-mix(in srgb, AccentColor 20%, transparent);
+  }
+}
+
+body.activity-stream {
+  --newtab-background-color: var(--vela-page);
+  --newtab-text-primary-color: var(--vela-ink);
+  --newtab-wordmark-color: var(--vela-ink);
+  background-color: var(--vela-page) !important;
+  background-image:
+    radial-gradient(ellipse 45% 55% at 88% 92%, var(--vela-glow-warm), transparent 70%),
+    radial-gradient(ellipse 40% 45% at 6% 100%, var(--vela-glow-warm), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 18% 8%, var(--vela-glow-cool), transparent 70%),
+    radial-gradient(ellipse 35% 40% at 96% 18%, var(--vela-glow-cool), transparent 70%) !important;
+  background-attachment: fixed !important;
+  color: var(--vela-ink);
+}
+
+/* The logo and the wordmark: "Vela" in the serif, "by ProairetOS" under it. */
+.logo-and-wordmark {
+  width: max-content !important;
+  gap: 18px;
+  margin-block-end: 44px !important;
+}
+.logo-and-wordmark .logo {
+  width: 150px !important;
+  height: 150px !important;
+  background: url("@VELA_LOGO@") no-repeat center / contain !important;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .28));
+}
+.logo-and-wordmark .wordmark {
+  display: inline-flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  background: none !important;
+  color: var(--vela-ink);
+  line-height: 1;
+}
+.logo-and-wordmark .wordmark::before {
+  content: "";
+  display: block;
+  width: 226px;
+  height: 100px;
+  background: var(--vela-ink);
+  mask: url("@VELA_WORDMARK@") left center / contain no-repeat;
+}
+.logo-and-wordmark .wordmark::after {
+  content: "by Proairet";
+  align-self: flex-end;
+  margin-top: 4px;
+  margin-inline-end: var(--vela-os-width);
+  font-size: 34px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: var(--vela-ink-muted);
+}
+/* "OS" in gold, at the byline's end: the wordmark column is as tall as the logo and centered, so its last line
+   sits a fixed distance from the bottom. */
+.logo-and-wordmark {
+  position: relative;
+  --vela-os-width: 1.42em;
+}
+.logo-and-wordmark .wordmark {
+  height: 150px !important;
+  font-size: 34px;
+}
+.logo-and-wordmark::after {
+  content: "OS";
+  position: absolute;
+  right: 0;
+  bottom: 3px;
+  font-size: 34px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: var(--vela-gold);
+}
+
+/* The search field: one wide pill. */
+.search-inner-wrapper {
+  max-width: 760px !important;
+  width: 100% !important;
+  margin-inline: auto !important;
+}
+content-search-handoff-ui {
+  --content-search-handoff-ui-background-color: var(--vela-card);
+  --content-search-handoff-ui-color: var(--vela-ink);
+  --content-search-handoff-ui-fill: var(--vela-ink-muted);
+  --content-search-handoff-ui-caret-color: var(--vela-gold);
+  --content-search-handoff-ui-border-radius: 999px;
+  --content-search-handoff-ui-unfocused-border-color: var(--vela-card-border);
+  --content-search-handoff-ui-fakefocus-border-color: var(--vela-gold);
+  --content-search-handoff-ui-fakefocus-box-shadow-inner: var(--vela-gold-soft);
+  --content-search-handoff-ui-fakefocus-box-shadow-outer: transparent;
+  --newtab-search-icon: var(--vela-search-glass);
+  --content-search-handoff-ui-engine-icon: var(--vela-search-glass);
+  --vela-search-glass: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8b0bb' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='m15.5 15.5 4.5 4.5'/%3E%3C/svg%3E");
+  --box-shadow-level-3: var(--vela-lift);
+  height: 58px;
+}
+
+/* Shortcut tiles: rounded cards with the site's icon and name. */
+.top-sites-list {
+  gap: 20px !important;
+  justify-content: center !important;
+}
+.top-site-outer {
+  width: 132px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.top-site-outer .top-site-inner,
+.top-site-outer .top-site-button {
+  width: 100% !important;
+}
+.top-site-outer .top-site-button {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 8px 14px !important;
+  border: 1px solid var(--vela-card-border) !important;
+  border-radius: 20px !important;
+  background: var(--vela-card) !important;
+  box-shadow: var(--vela-lift);
+  transition: background-color 160ms ease, transform 260ms var(--vela-spring), box-shadow 260ms var(--vela-ease) !important;
+}
+.top-site-outer .top-site-button:hover {
+  background: var(--vela-card-hover) !important;
+  transform: translateY(-3px);
+}
+.top-site-outer .top-site-button:active {
+  transform: translateY(0) scale(.97);
+}
+.top-site-outer .top-site-button:focus-visible {
+  outline: 2px solid var(--vela-gold) !important;
+  outline-offset: 2px;
+}
+.top-site-outer .tile {
+  align-self: center !important;
+  width: 48px !important;
+  height: 48px !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 12px !important;
+}
+.top-site-outer .tile .icon-stack,
+.top-site-outer .tile .icon-wrapper,
+.top-site-outer .tile .top-site-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 12px !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+.top-site-outer .title {
+  width: 100% !important;
+  padding: 0 !important;
+  color: var(--vela-ink) !important;
+  font-size: 15px !important;
+}
+.top-site-outer .title,
+.top-site-outer .title .title-label {
+  display: block !important;
+  text-align: center !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Pinned tiles keep their pin out of sight so the name centers. */
+.top-site-outer .title .icon,
+.top-site-outer .title::before {
+  display: none !important;
+}
+.top-site-outer .title {
+  padding-inline: 0 !important;
+  justify-content: center !important;
+}
+.top-site-outer .title .title-label {
+  width: auto !important;
+  min-height: 0 !important;
+  padding-inline: 0 !important;
+  margin-inline: 0 !important;
+}
+.top-site-outer .context-menu-button {
+  top: 6px !important;
+  inset-inline-end: 6px !important;
+}
+/* The Add tile: the same card, a plus over the word Add. */
+.top-site-outer.add-button-tile {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  align-self: stretch;
+  min-height: 0 !important;
+  height: auto !important;
+  padding-top: 20px !important;
+  box-sizing: border-box;
+  border: 1px solid var(--vela-card-border);
+  border-radius: 20px;
+  background: var(--vela-card);
+  box-shadow: var(--vela-lift);
+  transition: background-color 160ms ease, transform 260ms var(--vela-spring);
+}
+.top-site-outer.add-button-tile:hover {
+  background: var(--vela-card-hover);
+  transform: translateY(-3px);
+}
+.top-site-outer.add-button-tile::after {
+  content: "Add";
+  color: var(--vela-ink);
+  font-size: 15px;
+  pointer-events: none;
+}
+.top-site-outer.add-button-tile moz-button.add-button {
+  --button-background-color-primary: transparent;
+  --button-background-color-primary-hover: transparent;
+  --button-background-color-primary-active: transparent;
+  --button-border-color-primary: transparent;
+  --button-text-color-primary: var(--vela-ink);
+  --button-text-color-primary-hover: var(--vela-ink);
+  --button-background-color: transparent;
+  --button-background-color-hover: transparent;
+  --button-background-color-active: transparent;
+  --button-icon-fill: var(--vela-ink);
+  --button-size-icon: 48px;
+  --icon-size: 30px;
+}
+.top-site-outer.add-button-tile moz-button.add-button {
+  position: static !important;
+  inset: auto !important;
+  margin: 0 !important;
+}
+.top-site-outer.add-button-tile moz-button.add-button::part(button) {
+  width: 48px !important;
+  height: 48px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--vela-ink) !important;
+  fill: var(--vela-ink) !important;
+}
+/* The whole card adds a shortcut, not only the plus. */
+.top-site-outer.add-button-tile moz-button.add-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.top-site-outer.add-button-tile { position: relative; }
+
+/* Customize stays available, without its colored badge. */
+.personalizeButtonWrapper moz-button {
+  --button-background-color-primary: var(--vela-card);
+  --button-background-color-primary-hover: var(--vela-card-hover);
+  --button-background-color-primary-active: var(--vela-card-hover);
+  --button-border-color-primary: var(--vela-card-border);
+  --button-text-color-primary: var(--vela-ink-muted);
+  --button-text-color-primary-hover: var(--vela-ink);
+}
+.personalizeButtonWrapper moz-button::part(button) {
+  background: var(--vela-card) !important;
+  border: 1px solid var(--vela-card-border) !important;
+  color: var(--vela-ink-muted) !important;
+  fill: var(--vela-ink-muted) !important;
+}
+
+/* The page comes in: the logo settles, the field rises, then the tiles one after another. */
+@media (prefers-reduced-motion: no-preference) {
+  .logo-and-wordmark .logo { animation: vela-logo-in 700ms var(--vela-spring) both; }
+  .logo-and-wordmark .wordmark { animation: vela-rise 600ms var(--vela-ease) 80ms both; }
+  .search-inner-wrapper { animation: vela-rise 600ms var(--vela-ease) 160ms both; }
+  .top-site-outer { animation: vela-rise 520ms var(--vela-ease) both; }
+  .top-site-outer:nth-child(1) { animation-delay: 240ms; }
+  .top-site-outer:nth-child(2) { animation-delay: 280ms; }
+  .top-site-outer:nth-child(3) { animation-delay: 320ms; }
+  .top-site-outer:nth-child(4) { animation-delay: 360ms; }
+  .top-site-outer:nth-child(5) { animation-delay: 400ms; }
+  .top-site-outer:nth-child(6) { animation-delay: 440ms; }
+  .top-site-outer:nth-child(n + 7) { animation-delay: 480ms; }
+}
+@keyframes vela-logo-in {
+  from { opacity: 0; transform: scale(.82) rotate(-8deg); }
+}
+@keyframes vela-rise {
+  from { opacity: 0; transform: translateY(14px); }
+}

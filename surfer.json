@@ -15,7 +15,7 @@
   "addons": {},
   "brands": {
     "release": {
-      "backgroundColor": "#0B2636",
+      "backgroundColor": "#171B21",
       "brandShorterName": "Vela",
       "brandShortName": "Vela",
       "brandFullName": "Vela",
@@ -35,14 +35,14 @@
       }
     },
     "twilight": {
-      "backgroundColor": "#282A33",
-      "brandShorterName": "Zen",
-      "brandShortName": "Twilight",
-      "brandFullName": "Zen Twilight",
+      "backgroundColor": "#171B21",
+      "brandShorterName": "Vela",
+      "brandShortName": "Vela Twilight",
+      "brandFullName": "Vela Twilight",
       "release": {
         "displayVersion": "1.25t",
         "github": {
-          "repo": "zen-browser/desktop"
+          "repo": "boleydavid7-gif/Proairetos-Browser"
         }
       }
     }

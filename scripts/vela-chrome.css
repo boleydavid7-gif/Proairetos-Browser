@@ -1,512 +1,723 @@
-/* Vela browser chrome: system Lamplight palette is set by vela-native.js. */
-:root {
-  --lamplight-base: #0b2432;
-  --lamplight-surface: #102f40;
-  --lamplight-raised: #193b4e;
-  --lamplight-text: #edf5fa;
-  --lamplight-muted: #a8bac6;
-  --lamplight-accent: #49c8d6;
-  --lamplight-border: #28495b;
-}
-:root[vela-desktop-palette="true"] {
-  --toolbarbutton-hover-background: var(--lamplight-raised) !important;
-  --toolbar-field-background-color: var(--lamplight-raised) !important;
-  --toolbar-field-color: var(--lamplight-text) !important;
-  --arrowpanel-background: var(--lamplight-surface) !important;
-  --arrowpanel-color: var(--lamplight-text) !important;
-  --arrowpanel-border-color: var(--lamplight-border) !important;
-}
-:root[vela-desktop-palette="true"] :is(#zen-main-app-wrapper,#zen-appcontent-navbar-wrapper,#nav-bar,#navigator-toolbox,#vela-top-tabs) {
-  background-color: var(--lamplight-base) !important;
-  color: var(--lamplight-text) !important;
-}
-:root:not([privatebrowsingmode="temporary"],[popup-window]) {
-  --arrowpanel-border-radius: 12px !important;
-  --panel-border-radius: 12px !important;
-  --toolbarbutton-border-radius: 8px !important;
-}
-:root:not([privatebrowsingmode="temporary"],[popup-window]) #urlbar .urlbar-background { border-radius: 12px !important; }
-:root:not([privatebrowsingmode="temporary"],[popup-window]) .urlbarView-row-inner { border-radius: 8px !important; }
+/* Vela browser chrome. Loaded into browser.xhtml only (never into web pages).
+ *
+ * Layout on top of Zen's own two-row view (zen.view.use-single-toolbar = false, collapsed sidebar):
+ *   #vela-tabstrip  the tab row across the window, the selected tab joining the toolbar under it
+ *   #nav-bar        Zen's toolbar, restyled: grid, back, forward, reload, the address pill, Vela, menu
+ *   #vela-rail      icon rail in Zen's sidebar: Home, Bookmarks, History, Downloads, Extensions, Settings
+ * Zen's tab list stays in the document, out of sight, so shortcuts, session restore and add-ons keep working.
+ *
+ * Colors: vela.theme.colors = "vela" (default: the Vela palette in light and dark) or "system" (the system's
+ * light or dark scheme and accent color; in the ProairetOS session, its Lamplight palette, set by vela-native.js).
+ * Icons and the logo are relative to this sheet: chrome://browser/content/vela-icons/, vela-logo.svg.
+ */
 
-/* A top strip that does not alter Firefox's original tab container. */
-#vela-top-tabs {
-  display: flex !important;
-  flex: 0 0 auto !important;
-  height: 42px;
-  min-height: 42px;
-  max-height: 42px;
-  padding: 4px 10px;
-  gap: 6px;
-  align-items: stretch;
-  min-width: 0;
-  background: var(--lamplight-base) !important;
-  color: var(--lamplight-text) !important;
-  box-sizing: border-box;
+/* The wordmark's serif (EB Garamond, SIL Open Font License: fonts/OFL-EB-Garamond.txt). */
+@font-face {
+  font-family: "Vela Serif";
+  font-weight: 500;
+  font-style: normal;
+  src: url("fonts/eb-garamond-500.woff2") format("woff2");
 }
-#vela-top-tab-items {
-  display: flex !important;
-  flex: 1 1 auto !important;
-  flex-direction: row !important;
-  align-items: center !important;
+
+/* ---------- Palette ---------- */
+
+:root[vela] {
+  color-scheme: light dark;
+  --vela-window: light-dark(#ece6da, #171b21);
+  --vela-tabrow: light-dark(#e4ddcf, #1a1e25);
+  --vela-toolbar: light-dark(#f7f3ea, #252a32);
+  --vela-rail: light-dark(#efe9de, #1d2128);
+  --vela-surface: light-dark(#ffffff, #2d333c);
+  --vela-raised: light-dark(#e9e2d4, #363c46);
+  --vela-hover: light-dark(rgba(60, 40, 10, .07), rgba(255, 255, 255, .07));
+  --vela-press: light-dark(rgba(60, 40, 10, .12), rgba(255, 255, 255, .12));
+  --vela-text: light-dark(#2a2118, #eef0f3);
+  --vela-muted: light-dark(#6b5f50, #a8b0bb);
+  --vela-border: light-dark(rgba(60, 40, 10, .14), rgba(255, 255, 255, .11));
+  --vela-accent: light-dark(#a8620c, #f0a830);
+  --vela-accent-fill: light-dark(#e6a23a, #f0a830);
+  --vela-accent-soft: light-dark(rgba(214, 140, 30, .16), rgba(240, 168, 48, .16));
+  --vela-accent-ink: #2a1a06;
+  --vela-shadow: light-dark(0 1px 2px rgba(60, 40, 10, .12), 0 1px 2px rgba(0, 0, 0, .35));
+  --vela-radius: 10px;
+  --vela-tab-height: 36px;
+  --vela-tabrow-height: 44px;
+  --vela-rail-width: 64px;
+  --vela-ease: cubic-bezier(.2, .8, .2, 1);
+  --vela-spring: cubic-bezier(.34, 1.4, .5, 1);
+  --vela-fast: 140ms;
+  --vela-slow: 260ms;
+}
+
+/* System colors: the system's light or dark scheme and accent. */
+:root[vela][vela-colors="system"] {
+  --vela-window: color-mix(in srgb, Canvas 90%, CanvasText 10%);
+  --vela-tabrow: color-mix(in srgb, Canvas 86%, CanvasText 14%);
+  --vela-toolbar: Canvas;
+  --vela-rail: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+  --vela-surface: color-mix(in srgb, Canvas 94%, CanvasText 6%);
+  --vela-raised: color-mix(in srgb, Canvas 84%, CanvasText 16%);
+  --vela-hover: color-mix(in srgb, CanvasText 8%, transparent);
+  --vela-press: color-mix(in srgb, CanvasText 14%, transparent);
+  --vela-text: CanvasText;
+  --vela-muted: color-mix(in srgb, CanvasText 64%, Canvas);
+  --vela-border: color-mix(in srgb, CanvasText 13%, transparent);
+  --vela-accent: AccentColor;
+  --vela-accent-fill: AccentColor;
+  --vela-accent-soft: color-mix(in srgb, AccentColor 18%, transparent);
+  --vela-accent-ink: AccentColorText;
+}
+
+/* In the ProairetOS session, vela-native.js sets the Lamplight roles; the system scheme above is the fallback. */
+:root[vela][vela-colors="system"][vela-desktop-palette] {
+  --vela-window: var(--lamplight-base);
+  --vela-tabrow: color-mix(in srgb, var(--lamplight-base) 88%, var(--lamplight-text) 12%);
+  --vela-toolbar: var(--lamplight-surface);
+  --vela-rail: var(--lamplight-base);
+  --vela-surface: var(--lamplight-raised);
+  --vela-raised: color-mix(in srgb, var(--lamplight-raised) 85%, var(--lamplight-text) 15%);
+  --vela-hover: color-mix(in srgb, var(--lamplight-text) 8%, transparent);
+  --vela-press: color-mix(in srgb, var(--lamplight-text) 14%, transparent);
+  --vela-text: var(--lamplight-text);
+  --vela-muted: color-mix(in srgb, var(--lamplight-text) 66%, var(--lamplight-base));
+  --vela-border: color-mix(in srgb, var(--lamplight-text) 13%, transparent);
+  --vela-accent: var(--lamplight-accent);
+  --vela-accent-fill: var(--lamplight-accent);
+  --vela-accent-soft: color-mix(in srgb, var(--lamplight-accent) 18%, transparent);
+  --vela-accent-ink: var(--lamplight-base);
+}
+
+/* The names the curated mods (vela-curated-mods.css) read. */
+:root[vela]:not([vela-desktop-palette]) {
+  --lamplight-base: var(--vela-window);
+  --lamplight-surface: var(--vela-toolbar);
+  --lamplight-raised: var(--vela-surface);
+  --lamplight-text: var(--vela-text);
+  --lamplight-muted: var(--vela-muted);
+  --lamplight-accent: var(--vela-accent);
+  --lamplight-border: var(--vela-border);
+}
+
+/* Firefox and Zen tokens the rest of the chrome (menus, panels, the address bar's results) reads. */
+:root[vela] {
+  --toolbar-bgcolor: var(--vela-toolbar) !important;
+  --toolbar-color: var(--vela-text) !important;
+  --toolbox-textcolor: var(--vela-text) !important;
+  --toolbarbutton-icon-fill: var(--vela-text) !important;
+  --toolbarbutton-border-radius: 8px !important;
+  --toolbarbutton-hover-background: var(--vela-hover) !important;
+  --toolbarbutton-active-background: var(--vela-press) !important;
+  --toolbar-field-background-color: var(--vela-surface) !important;
+  --toolbar-field-focus-background-color: var(--vela-surface) !important;
+  --toolbar-field-color: var(--vela-text) !important;
+  --toolbar-field-focus-color: var(--vela-text) !important;
+  --arrowpanel-background: var(--vela-toolbar) !important;
+  --arrowpanel-color: var(--vela-text) !important;
+  --arrowpanel-border-color: var(--vela-border) !important;
+  --panel-separator-color: var(--vela-border) !important;
+  --focus-outline-color: var(--vela-accent) !important;
+  --zen-primary-color: var(--vela-accent-fill) !important;
+  --zen-colors-primary: var(--vela-accent-fill) !important;
+  --zen-colors-secondary: var(--vela-raised) !important;
+  --zen-colors-tertiary: var(--vela-toolbar) !important;
+  --zen-colors-border: var(--vela-border) !important;
+  --zen-themed-toolbar-bg: var(--vela-window) !important;
+  --zen-main-browser-background: var(--vela-window) !important;
+  --zen-element-separation: 0px !important;
+  --zen-border-radius: 0px !important;
+  accent-color: var(--vela-accent-fill);
+}
+
+/* ---------- Window and background ---------- */
+
+:root[vela] #zen-browser-background,
+:root[vela] .zen-browser-generic-background {
+  background: var(--vela-window) !important;
+}
+:root[vela] .zen-browser-generic-background::before,
+:root[vela] .zen-browser-generic-background::after,
+:root[vela] .zen-browser-grain {
+  display: none !important;
+}
+:root[vela] body {
+  background: var(--vela-window) !important;
+  color: var(--vela-text);
+}
+/* The page sits flush under the toolbar and beside the rail, as in the design. */
+:root[vela] #tabbrowser-tabbox,
+:root[vela] #tabbrowser-tabpanels,
+:root[vela] .browserSidebarContainer,
+:root[vela] .browserContainer,
+:root[vela] .browserStack,
+:root[vela] .browserStack > browser {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  margin: 0 !important;
+}
+:root[vela] #zen-tabbox-wrapper {
+  margin: 0 !important;
+  border-top: 1px solid var(--vela-border);
+}
+
+/* ---------- Tab row ---------- */
+
+#vela-tabstrip {
+  display: flex;
+  align-items: flex-end;
+  height: var(--vela-tabrow-height);
+  min-height: var(--vela-tabrow-height);
+  background: var(--vela-tabrow);
+  color: var(--vela-text);
+  -moz-window-dragging: drag;
+  position: relative;
+  z-index: 3;
+}
+#vela-tabstrip toolbarbutton,
+#vela-tabstrip .vela-tab {
+  -moz-window-dragging: no-drag;
+}
+#vela-tabstrip-lead {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--vela-rail-width);
+  min-width: var(--vela-rail-width);
+  height: 100%;
+}
+
+.vela-icon-button {
+  appearance: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  margin: 0;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--vela-text);
+  -moz-context-properties: fill, fill-opacity;
+  fill: currentColor;
+  transition: background-color var(--vela-fast) ease, opacity var(--vela-fast) ease;
+}
+.vela-icon-button > .toolbarbutton-icon {
+  width: 20px !important;
+  height: 20px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.vela-icon-button > .toolbarbutton-text { display: none; }
+.vela-icon-button:hover { background: var(--vela-hover); }
+.vela-icon-button:hover:active { background: var(--vela-press); }
+.vela-icon-button:focus-visible { outline: 2px solid var(--vela-accent); outline-offset: -2px; }
+
+#vela-rail-toggle { list-style-image: url("vela-icons/chevron-left.svg"); color: var(--vela-muted); }
+:root[vela-rail-hidden] #vela-rail-toggle { list-style-image: url("vela-icons/chevron-right.svg"); }
+
+#vela-tabs {
+  display: flex;
+  align-items: flex-end;
+  flex: 0 1 auto;
   min-width: 0;
+  height: 100%;
+  padding: 0 4px 0 6px;
   overflow-x: auto;
   overflow-y: hidden;
-  scrollbar-width: thin;
-  gap: 4px;
-}
-#vela-top-tab-items .vela-tab-item {
-  display: flex !important;
-  align-items: center !important;
-  flex: 0 0 168px !important;
-  max-width: 220px;
-  min-width: 94px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--lamplight-surface);
-  color: var(--lamplight-muted);
-}
-#vela-top-tab-items .vela-tab-item[selected="true"] {
-  background: var(--lamplight-raised);
-  color: var(--lamplight-text);
-  box-shadow: inset 0 -2px var(--lamplight-accent);
-}
-#vela-top-tab-items .vela-tab-select {
-  appearance: none;
-  min-width: 0;
-  flex: 1 1 auto;
-  width: 0;
-  padding: 5px 10px;
-  color: inherit;
-}
-#vela-top-tab-items .vela-tab-select .toolbarbutton-text {
-  display: -moz-box !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-#vela-top-tab-items .vela-tab-close {
-  appearance: none;
-  flex: 0 0 26px;
-  min-width: 26px;
-  padding: 4px;
-  border-radius: 6px;
-  color: inherit;
-}
-#vela-top-tab-items .vela-tab-close:hover, #vela-add-tab:hover { background: var(--lamplight-raised); }
-#vela-add-tab {
-  appearance: none;
-  flex: 0 0 32px;
-  min-width: 32px;
-  border-radius: 8px;
-  color: var(--lamplight-text);
+  scrollbar-width: none;
 }
 
-/* Vela tools belong INSIDE Zen's automatically opened sidebar. */
-#navigator-toolbox #vela-native-rail {
-  display: flex !important;
-  flex-direction: column !important;
-  flex: 0 0 auto !important;
-  width: auto !important;
-  min-width: 0 !important;
-  max-width: 100%;
-  box-sizing: border-box;
-  margin: 10px 6px 8px !important;
-  padding: 10px 4px 8px !important;
-  border-top: 1px solid var(--lamplight-border);
-  gap: 4px;
-  background: transparent;
-  color: var(--lamplight-text);
-  overflow: hidden;
-}
-#vela-sidebar-heading { display: flex !important; align-items: center; min-height: 28px; margin-bottom: 4px; }
-#vela-sidebar-heading .vela-rail-heading {
-  display: flex !important;
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0 8px !important;
-  color: var(--lamplight-text);
-}
-#vela-sidebar-actions, #vela-pinned-sites { display: flex !important; flex-direction: column !important; gap: 3px; min-width: 0; }
-#navigator-toolbox #vela-native-rail toolbarbutton {
-  appearance: none;
-  min-height: 34px;
-  margin: 0;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--lamplight-text);
-  text-align: start;
-}
-#navigator-toolbox #vela-native-rail toolbarbutton:hover { background: var(--lamplight-raised); }
-#navigator-toolbox #vela-native-rail toolbarbutton:focus-visible,
-#vela-top-tabs toolbarbutton:focus-visible {
-  outline: 2px solid var(--lamplight-accent) !important;
-  outline-offset: -2px;
-}
-#navigator-toolbox #vela-native-rail .vela-sidebar-action {
-  display: flex !important;
-  width: 100%;
-  flex: 0 0 auto;
-  justify-content: flex-start;
-}
-#navigator-toolbox #vela-native-rail .vela-sidebar-action .toolbarbutton-text {
-  display: -moz-box !important;
-  font-size: 13px !important;
-}
-#vela-sites-heading { display: flex !important; align-items: center; margin: 10px 5px 2px; }
-#vela-sites-heading label { flex: 1; color: var(--lamplight-muted); font-size: 12px; font-weight: 600; }
-#navigator-toolbox #vela-native-rail #vela-pin-site { min-width: 28px; padding: 2px; }
-#vela-sites-empty { font-size: 12px; color: var(--lamplight-muted); padding: 9px 10px; }
-#vela-native-rail .vela-site-row { display: flex !important; align-items: center; min-width: 0; }
-#vela-native-rail .vela-site-open {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-#vela-native-rail .vela-site-open .toolbarbutton-text {
-  display: -moz-box !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-#vela-native-rail .vela-site-remove { flex: 0 0 26px; min-width: 26px; padding: 2px; }
-#vela-native-rail .vela-site-row:hover { border-radius: 8px; background: var(--lamplight-surface); }
-/* Disable the old resize affordance: sizing is managed by Zen's sidebar itself. */
-#vela-sidebar-resize { display: none !important; }
-@media (prefers-color-scheme: light) {
-  :root:not([vela-desktop-palette="true"]) {
-    --lamplight-base: #f4f6f8;
-    --lamplight-surface: #ffffff;
-    --lamplight-raised: #e6ebef;
-    --lamplight-text: #172b36;
-    --lamplight-muted: #596e79;
-    --lamplight-accent: #087c93;
-    --lamplight-border: #d0dbe1;
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  #vela-top-tabs .vela-tab-item,
-  #vela-native-rail toolbarbutton { transition: background-color 150ms ease, color 150ms ease; }
-}
-:root:is([inDOMFullscreen="true"],[popup-window]) #vela-top-tabs { display: none !important; }
-
-/* New tabs are created from Vela's top strip, not Zen's vertical sidebar.
-   Scope strictly to the native sidebar; never hide #vela-add-tab. */
-#navigator-toolbox :is(
-  #tabs-newtab-button,
-  #new-tab-button,
-  #zen-newtab-button,
-  #zen-new-tab-button
-) {
-  display: none !important;
-}
-#navigator-toolbox #tabbrowser-arrowscrollbox-periphery > #tabs-newtab-button {
-  display: none !important;
-}
-
-/*
- * Claude's Fluent-inspired browser treatment, adapted to Zen/Firefox chrome.
- * Native Firefox tabs and browsing state remain owned by Firefox.
- */
-:root {
-  --vela-pane: color-mix(in srgb, var(--lamplight-base) 92%, #000);
-  --vela-tab-surface: color-mix(in srgb, var(--lamplight-surface) 93%, var(--lamplight-base));
-  --vela-soft-accent: color-mix(in srgb, var(--lamplight-accent) 17%, transparent);
-  --vela-hover: color-mix(in srgb, var(--lamplight-text) 7%, transparent);
-  --vela-hairline: color-mix(in srgb, var(--lamplight-text) 10%, transparent);
-}
-/* Compact, quiet browser navigation pane. */
-#navigator-toolbox #vela-native-rail {
-  padding: 12px 8px 16px !important;
-  margin: 2px 4px 8px !important;
-  border-top: 0;
-  gap: 3px !important;
-  border-inline-end: 0;
-  color: var(--lamplight-text);
-}
-#vela-sidebar-heading {
-  min-height: 58px !important;
-  gap: 10px;
-  padding: 4px 6px 12px;
-  align-items: center !important;
-  border-bottom: 1px solid var(--vela-hairline);
-  margin-bottom: 10px !important;
-}
-#vela-sidebar-brandmark {
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px;
-  min-height: 38px;
-}
-#vela-sidebar-brandwords { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-#vela-sidebar-heading .vela-rail-heading {
-  font-family: "Google Sans Flex", system-ui, sans-serif;
-  font-size: 13px !important;
-  font-weight: 650 !important;
-  margin: 0 !important;
-  white-space: nowrap;
-  max-width: 178px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-#vela-sidebar-heading .vela-rail-subtitle {
-  font-size: 12px !important;
-  color: var(--lamplight-muted) !important;
-  margin: 0 !important;
-}
-#vela-sidebar-actions { gap: 2px !important; }
-#navigator-toolbox #vela-native-rail .vela-sidebar-action {
+.vela-tab {
   position: relative;
-  min-height: 40px !important;
-  padding: 0 12px !important;
-  gap: 12px;
-  border-radius: 8px;
+  display: flex;
   align-items: center;
-  transition: background-color 135ms ease;
+  gap: 9px;
+  flex: 0 1 240px;
+  min-width: 52px;
+  max-width: 240px;
+  height: var(--vela-tab-height);
+  margin: 0 1px;
+  padding: 0 6px 0 12px;
+  border-radius: var(--vela-radius) var(--vela-radius) 0 0;
+  color: var(--vela-muted);
+  cursor: default;
+  user-select: none;
+  transition: background-color var(--vela-fast) ease, color var(--vela-fast) ease;
 }
-#navigator-toolbox #vela-native-rail .vela-sidebar-action:hover {
+.vela-tab:not([selected]):hover {
   background: var(--vela-hover);
+  color: var(--vela-text);
 }
-#navigator-toolbox #vela-native-rail .vela-sidebar-action[aria-current="page"] {
-  background: var(--vela-soft-accent) !important;
-  color: var(--lamplight-text) !important;
-}
-#vela-sidebar-actions .vela-sidebar-action[aria-current="page"]::after {
+/* A thin divider between resting tabs, hidden next to the selected or hovered one. */
+.vela-tab:not([selected])::after {
   content: "";
   position: absolute;
-  inset-inline-start: 0;
-  top: 13px;
-  width: 3px;
-  height: 14px;
-  border-radius: 4px;
-  background: var(--lamplight-accent);
+  right: -1px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: var(--vela-border);
 }
-#vela-sidebar-actions .vela-sidebar-action::before {
-  content: "";
-  display: inline-block !important;
-  flex: 0 0 20px;
-  width: 20px;
-  height: 20px;
-  background-color: currentColor;
-  mask-size: 20px 20px;
-  mask-repeat: no-repeat;
-  mask-position: center;
-  opacity: .85;
-}
-#vela-sidebar-actions .vela-sidebar-action:nth-child(1)::before { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'black'%20stroke-width%3D'1.7'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cpath%20d%3D'M3%2010.5%2012%203l9%207.5V20H5v-9.5'%2F%3E%3Cpath%20d%3D'M9%2020v-6h6v6'%2F%3E%3C%2Fsvg%3E"); }
-#vela-sidebar-actions .vela-sidebar-action:nth-child(2)::before { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'black'%20stroke-width%3D'1.7'%20stroke-linejoin%3D'round'%3E%3Cpath%20d%3D'M6.5%203.5h11v17l-5.5-4-5.5%204z'%2F%3E%3C%2Fsvg%3E"); }
-#vela-sidebar-actions .vela-sidebar-action:nth-child(3)::before { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'black'%20stroke-width%3D'1.7'%20stroke-linecap%3D'round'%3E%3Cpath%20d%3D'M4%207v5h5M4%2012a8%208%200%201%201%202.7%206M12%207.5V12l3.5%202'%2F%3E%3C%2Fsvg%3E"); }
-#vela-sidebar-actions .vela-sidebar-action:nth-child(4)::before { mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'black'%20stroke-width%3D'1.7'%20stroke-linecap%3D'round'%3E%3Cpath%20d%3D'M12%203v11m-4-4%204%204%204-4M4%2017v3h16v-3'%2F%3E%3C%2Fsvg%3E"); }
-#navigator-toolbox #vela-native-rail .vela-sidebar-action .toolbarbutton-text {
-  font-size: 13px !important;
-  font-weight: 450 !important;
-}
-#vela-sites-heading {
-  margin: 14px 6px 5px !important;
-  padding-top: 9px;
-  border-top: 1px solid var(--vela-hairline);
-}
-#vela-sites-heading label {
-  font-size: 12px !important;
-  font-weight: 500 !important;
-  color: var(--lamplight-muted) !important;
-}
-#navigator-toolbox #vela-native-rail #vela-pin-site {
-  padding: 3px 7px !important;
-  font-size: 11px !important;
-  min-height: 28px;
-  border-radius: 7px;
-}
-#vela-pinned-sites { gap: 2px !important; }
-#vela-native-rail .vela-site-row { border-radius: 8px; gap: 6px; }
-#vela-native-rail .vela-site-mark {
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  min-width: 24px;
-  width: 24px;
-  height: 24px;
-  margin-inline-start: 8px;
-  border-radius: 6px;
-  background: var(--lamplight-raised);
-  color: var(--lamplight-text);
-  font-size: 12px;
-  font-weight: 650;
-}
-#vela-native-rail .vela-site-mark.is-proairetos {
-  font-size: 0;
-  background: url("chrome://browser/content/vela-logo.svg") center/21px 21px no-repeat;
-}
-#navigator-toolbox #vela-native-rail .vela-site-open {
-  min-height: 38px !important;
-  padding: 5px 4px !important;
-  white-space: nowrap;
-  font-size: 13px;
-}
-#navigator-toolbox #vela-native-rail .vela-site-remove {
+.vela-tab:hover::after,
+.vela-tab:last-child::after,
+.vela-tab:has(+ .vela-tab:is([selected], :hover))::after {
   opacity: 0;
-  transition: opacity 140ms ease;
 }
-#vela-native-rail .vela-site-row:hover .vela-site-remove,
-#vela-native-rail .vela-site-remove:focus-visible { opacity: 1 !important; }
-#vela-continue-heading {
+.vela-tab[selected] {
+  background: var(--vela-toolbar);
+  color: var(--vela-text);
+  z-index: 1;
+}
+/* The selected tab flows into the toolbar with inverted corners. */
+.vela-tab[selected]::before,
+.vela-tab[selected] > .vela-tab-corner {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: var(--vela-radius);
+  height: var(--vela-radius);
+  pointer-events: none;
+}
+.vela-tab[selected]::before {
+  left: calc(-1 * var(--vela-radius));
+  background: radial-gradient(circle at 0 0, transparent calc(var(--vela-radius) - .5px), var(--vela-toolbar) var(--vela-radius));
+}
+.vela-tab-corner { display: none; }
+.vela-tab[selected] > .vela-tab-corner {
   display: block;
-  margin: 18px 8px 5px;
-  padding-top: 10px;
-  border-top: 1px solid var(--vela-hairline);
-  color: var(--lamplight-muted);
-  font-size: 12px;
+  right: calc(-1 * var(--vela-radius));
+  background: radial-gradient(circle at 100% 0, transparent calc(var(--vela-radius) - .5px), var(--vela-toolbar) var(--vela-radius));
 }
-#vela-continue-tabs { display: flex; flex-direction: column; gap: 2px; }
-#navigator-toolbox #vela-native-rail .vela-continue-item {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  min-height: 34px;
-  padding: 5px 10px !important;
-  border-radius: 7px;
-  font-size: 12px;
-  color: var(--lamplight-muted);
+.vela-tab:focus-visible { outline: 2px solid var(--vela-accent); outline-offset: -3px; }
+
+.vela-tab-icon {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  -moz-context-properties: fill;
+  fill: currentColor;
 }
-#navigator-toolbox #vela-native-rail .vela-continue-item:hover { background: var(--vela-hover); color: var(--lamplight-text); }
-/* Manual pinned-site entry: browser-owned, with no web page script access. */
-#vela-add-site-form {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 12px;
-  margin-top: 8px;
-  border-radius: 9px;
-  background: var(--lamplight-surface);
-  border: 1px solid var(--vela-hairline);
-}
-#vela-add-site-form[hidden] { display: none !important; }
-#vela-add-site-form label { color: var(--lamplight-muted); font-size: 12px; }
-#vela-add-site-form input {
-  box-sizing: border-box;
-  min-width: 0;
-  width: 100%;
-  height: 32px;
-  border-radius: 6px;
-  border: 1px solid var(--vela-hairline);
-  outline: 0;
-  background: var(--lamplight-raised);
-  color: var(--lamplight-text);
-  padding-inline: 9px;
-  font: 12px system-ui, sans-serif;
-}
-#vela-add-site-form input:focus { border-color: var(--lamplight-accent); }
-#vela-site-error { color: #ec8d88 !important; font-size: 11px; }
-#vela-site-form-actions { display: flex; gap: 8px; margin-top: 4px; }
-#navigator-toolbox #vela-native-rail #vela-site-form-actions toolbarbutton {
-  min-height: 32px;
-  flex: 1 1 auto;
-  text-align: center;
-  justify-content: center;
-  background: var(--lamplight-raised);
-}
-#navigator-toolbox #vela-native-rail #vela-site-form-actions .vela-site-save {
-  background: var(--lamplight-accent);
-  color: var(--lamplight-base);
-}
-/* Fluent-inspired tab shapes meet the address toolbar instead of floating. */
-#vela-top-tabs {
-  min-height: 44px !important;
-  max-height: 44px !important;
-  height: 44px !important;
-  padding: 7px 10px 0 !important;
-  background: var(--vela-pane) !important;
-}
-#vela-top-tab-items { align-items: flex-end !important; gap: 3px; }
-#vela-top-tab-items .vela-tab-item {
-  min-height: 35px;
-  height: 35px;
-  flex-basis: 192px !important;
-  max-width: 240px;
-  border-radius: 9px 9px 0 0 !important;
-  background: transparent;
-  color: var(--lamplight-muted);
-  box-shadow: none;
-  position: relative;
-}
-#vela-top-tab-items .vela-tab-item:hover { background: var(--vela-hover); color: var(--lamplight-text); }
-#vela-top-tab-items .vela-tab-item[selected="true"] {
-  background: var(--vela-tab-surface) !important;
-  color: var(--lamplight-text);
-  box-shadow: inset 0 1px 0 var(--vela-hairline) !important;
-}
-#vela-top-tab-items .vela-tab-favicon {
-  min-width: 16px !important;
+.vela-tab-glyph {
   width: 16px !important;
   height: 16px !important;
-  margin-inline-start: 9px;
-  object-fit: contain;
+  min-width: 16px !important;
+  border-radius: 0 !important;
+  background: none !important;
+  color: inherit !important;
+  pointer-events: none;
+  list-style-image: url("vela-icons/page.svg");
 }
-#vela-top-tab-items .vela-tab-select { padding-inline: 7px !important; font-size: 12px; }
-#vela-top-tab-items .vela-tab-close {
-  opacity: .65;
-  min-height: 26px;
-  height: 26px;
-  margin-inline-end: 4px;
+.vela-tab-glyph > .toolbarbutton-icon { width: 16px !important; height: 16px !important; }
+.vela-tab-glyph[hidden], .vela-tab-icon[hidden] { display: none; }
+.vela-tab[vela-home] .vela-tab-icon {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  list-style-image: url("vela-logo.svg");
 }
-#vela-top-tab-items .vela-tab-item:hover .vela-tab-close { opacity: 1; }
-#vela-add-tab { height: 31px; align-self: flex-end; margin-bottom: 4px; }
-@media (prefers-reduced-motion: reduce) {
-  #vela-native-rail *, #vela-top-tabs *, #vela-top-tab-items * { transition: none !important; }
+.vela-tab[busy] .vela-tab-glyph { display: none; }
+.vela-tab[busy] .vela-tab-icon {
+  display: flex;
+  list-style-image: none;
+  border-radius: 50%;
+  border: 2px solid var(--vela-accent-soft);
+  border-top-color: var(--vela-accent);
+  box-sizing: border-box;
+  animation: vela-spin 800ms linear infinite;
+}
+.vela-tab-title {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(to left, transparent, #000 18px);
+  font-size: 13px;
+}
+.vela-tab[vela-home] .vela-tab-title { mask-image: none; }
+.vela-tab[vela-home] { flex: 0 0 auto; max-width: none; }
+.vela-tab-label { overflow: hidden; margin: 0; }
+.vela-tab[vela-home] .vela-tab-label { flex-shrink: 0; overflow: visible; }
+.vela-tab[vela-home] .vela-tab-label {
+  font-family: "Vela Serif", "EB Garamond", Georgia, serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--vela-text);
+}
+.vela-tab-byline { display: none; font-size: 12px; color: var(--vela-muted); }
+.vela-tab-byline > .vela-os { color: var(--vela-accent); }
+.vela-tab[vela-home] .vela-tab-byline { display: inline; }
+.vela-tab-close {
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  border-radius: 6px !important;
+  list-style-image: url("vela-icons/close.svg");
+  opacity: 0;
+}
+.vela-tab-close > .toolbarbutton-icon { width: 16px !important; height: 16px !important; }
+.vela-tab:is([selected], :hover) .vela-tab-close,
+.vela-tab-close:focus-visible { opacity: 1; }
+.vela-tab[pinned] {
+  flex: 0 0 44px;
+  min-width: 44px;
+  max-width: 44px;
+  padding: 0;
+  justify-content: center;
+}
+.vela-tab[pinned] :is(.vela-tab-title, .vela-tab-close) { display: none; }
+
+#vela-new-tab { list-style-image: url("vela-icons/plus.svg"); margin: 0 0 4px 6px; }
+#vela-tabstrip-space { flex: 1; min-width: 24px; align-self: stretch; }
+
+#vela-window-controls {
+  display: none;
+  align-self: stretch;
+  align-items: center;
+  gap: 2px;
+  padding: 0 6px;
+}
+:root[vela-own-controls] #vela-window-controls { display: flex; }
+#vela-window-controls > .vela-icon-button { width: 44px; height: 32px; color: var(--vela-text); }
+#vela-minimize { list-style-image: url("vela-icons/minimize.svg"); }
+#vela-maximize { list-style-image: url("vela-icons/maximize.svg"); }
+:root[sizemode="maximized"] #vela-maximize { list-style-image: url("vela-icons/restore.svg"); }
+#vela-close { list-style-image: url("vela-icons/close.svg"); }
+#vela-close:hover { background: #c42b1c; color: #fff; }
+
+/* Zen's and Firefox's own caption buttons give way to the tab row's. */
+:root[vela] .titlebar-buttonbox-container,
+:root[vela] #zen-sidebar-top-buttons {
+  display: none !important;
 }
 
-/* Vela navigation is the RIGHT Zen sidebar; tabs exist only in #vela-top-tabs.
- * Zen's own right-side preference positions #navigator-toolbox correctly.
- * Never move, delete, or reparent the real Firefox tab elements: gBrowser,
- * extensions, tab keyboard shortcuts and session restore need them.
- */
-:root[vela-sidebar-ready="true"][vela-tools-right="true"]
-  #navigator-toolbox :is(
-    #zen-browser-tabs-wrapper,
-    #zen-browser-tabs-container,
-    #zen-tabs-wrapper,
-    #tabbrowser-tabs,
-    #zen-essentials-container,
-    #vertical-pinned-tabs-container,
-    #zen-create-new-button,
-    #zen-workspaces-button,
-    .zen-workspace-tabs-section
-  ) {
-  display: none !important;
+/* Tabs grow in, and shrink out as they close. */
+@media (prefers-reduced-motion: no-preference) {
+  .vela-tab[vela-entering] { animation: vela-tab-in var(--vela-slow) var(--vela-ease); }
+  .vela-tab[vela-leaving] { animation: vela-tab-out 180ms var(--vela-ease) forwards; pointer-events: none; }
+  .vela-tab[selected] { transition: background-color var(--vela-slow) var(--vela-ease), color var(--vela-fast) ease; }
 }
-/* Some Zen layouts keep spacer rows / separators outside the tab container. */
-:root[vela-sidebar-ready="true"][vela-tools-right="true"]
-  #navigator-toolbox :is(
-    #zen-pinned-tabs-wrapper,
-    #zen-tabs-separator,
-    #zen-pinned-tabs-separator,
-    #zen-sidebar-bottom-tab-container
-  ) {
-  display: none !important;
+.vela-tab[vela-dragging] { opacity: .8; z-index: 2; transition: none; }
+@keyframes vela-tab-in {
+  from { max-width: 0; min-width: 0; opacity: 0; padding-inline: 0; }
+  60% { opacity: 1; }
 }
-/* This panel remains browser-owned chrome inside the original Zen toolbox. */
-:root[vela-sidebar-ready="true"][vela-tools-right="true"] 
-  #navigator-toolbox #vela-native-rail {
-  display: flex !important;
+@keyframes vela-tab-out {
+  to { max-width: 0; min-width: 0; flex-basis: 0; opacity: 0; padding-inline: 0; margin-inline: 0; }
+}
+@keyframes vela-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Toolbar ---------- */
+
+:root[vela] #zen-appcontent-navbar-wrapper {
+  background: var(--vela-toolbar) !important;
+  height: auto !important;
+  min-height: 52px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+:root[vela] #zen-appcontent-navbar-container {
+  background: transparent !important;
+}
+:root[vela] #nav-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  background: var(--vela-toolbar) !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  margin: 0 !important;
+  padding: 0 10px 0 8px !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  align-items: center !important;
+}
+:root[vela] #nav-bar-customization-target {
+  gap: 4px;
+  align-items: center;
+}
+:root[vela] #nav-bar toolbarspring { display: none !important; }
+:root[vela] #nav-bar .toolbarbutton-1 > :is(.toolbarbutton-icon, .toolbarbutton-badge-stack) {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  transition: background-color var(--vela-fast) ease;
+}
+:root[vela] #back-button { list-style-image: url("vela-icons/back.svg") !important; }
+:root[vela] #forward-button { list-style-image: url("vela-icons/forward.svg") !important; }
+:root[vela] #reload-button { list-style-image: url("vela-icons/reload.svg") !important; }
+:root[vela] #stop-button { list-style-image: url("vela-icons/stop.svg") !important; }
+:root[vela] #PanelUI-menu-button { list-style-image: url("vela-icons/menu.svg") !important; }
+:root[vela] #nav-bar .toolbarbutton-1[disabled] { opacity: .4; }
+
+#vela-grid-button { list-style-image: url("vela-icons/grid.svg"); margin-right: 6px !important; }
+#vela-menu-button { list-style-image: url("vela-logo.svg"); }
+:root[vela] #vela-menu-button > .toolbarbutton-icon {
+  -moz-context-properties: none;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 5px !important;
+  transition: transform var(--vela-slow) var(--vela-spring), background-color var(--vela-fast) ease;
+}
+#vela-menu-button:hover > .toolbarbutton-icon { transform: rotate(-8deg) scale(1.06); }
+#vela-menu-button[open] > .toolbarbutton-icon { background: var(--vela-press); }
+#vela-toolbar-separator {
+  width: 1px;
+  height: 22px;
+  margin: 0 8px 0 10px;
+  background: var(--vela-border);
+}
+
+/* The address field: one rounded pill. */
+:root[vela] #urlbar-container {
   flex: 1 1 auto !important;
-  flex-direction: column !important;
-  min-height: 0 !important;
+  max-width: none !important;
   width: auto !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  scrollbar-width: thin;
-  margin: 4px 6px 8px !important;
-  border-top: 0 !important;
-  border-inline-start: 1px solid var(--vela-hairline);
-  border-inline-end: 0 !important;
+  margin: 0 6px 0 10px !important;
+  padding: 0 !important;
+  --urlbar-container-height: 40px !important;
+  --urlbar-min-height: 40px !important;
+  --urlbar-height: 40px !important;
 }
-/* The right side uses Zen's layout, not a second absolutely positioned rail. */
-:root[vela-sidebar-ready="true"][zen-right-side="true"]
-  #navigator-toolbox #vela-native-rail { margin-inline-end: 6px !important; }
-/* The top bar is never part of the right navigation panel. */
-:root[vela-sidebar-ready="true"] #vela-top-tabs {
+:root[vela] #urlbar:not([breakout-extend]) {
+  --urlbar-height: 40px !important;
+  --urlbar-min-height: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  top: 0 !important;
+}
+:root[vela] #urlbar .urlbar-background,
+:root[vela] #urlbar-background {
+  background: var(--vela-surface) !important;
+  border: 1px solid var(--vela-border) !important;
+  border-radius: 999px !important;
+  box-shadow: var(--vela-shadow) !important;
+  outline: none !important;
+  backdrop-filter: none !important;
+  transition: border-color var(--vela-fast) ease, box-shadow var(--vela-slow) var(--vela-ease);
+}
+:root[vela] #urlbar:hover:not([focused]) .urlbar-background {
+  border-color: color-mix(in srgb, var(--vela-text) 22%, transparent) !important;
+}
+:root[vela] #urlbar[focused] .urlbar-background {
+  border-color: var(--vela-accent) !important;
+  box-shadow: 0 0 0 3px var(--vela-accent-soft), var(--vela-shadow) !important;
+}
+/* Open with results, the pill becomes a rounded panel. */
+:root[vela] #urlbar[open] .urlbar-background {
+  border-radius: 20px !important;
+}
+:root[vela] #urlbar :is(#urlbar-input, .urlbar-input) {
+  color: var(--vela-text) !important;
+  font-size: 14px !important;
+}
+:root[vela] #urlbar :is(#urlbar-input, .urlbar-input)::placeholder {
+  color: var(--vela-muted) !important;
+  opacity: 1 !important;
+}
+:root[vela] #zen-copy-url-button { display: none !important; }
+/* A search glass at the field's start, as in the design. */
+:root[vela] #urlbar .urlbar-input-container::before {
+  content: "";
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-inline: 6px 2px;
+  align-self: center;
+  background: var(--vela-muted);
+  mask: url("vela-icons/search-mask.svg") center / 20px no-repeat;
+}
+:root[vela] #urlbar:is([searchmode], [pageproxystate="valid"]) .urlbar-input-container::before { display: none; }
+:root[vela] #star-button-box {
   display: flex !important;
 }
-:root[vela-sidebar-ready="true"]:is([inDOMFullscreen="true"],[popup-window])
-  #vela-top-tabs { display: none !important; }
+:root[vela] #star-button:not([starred]) {
+  list-style-image: url("vela-icons/star.svg") !important;
+}
+:root[vela] #star-button[starred] {
+  fill: var(--vela-accent) !important;
+}
+
+/* ---------- Rail ---------- */
+
+:root[vela] #navigator-toolbox {
+  width: var(--vela-rail-width) !important;
+  min-width: var(--vela-rail-width) !important;
+  max-width: var(--vela-rail-width) !important;
+  padding: 0 !important;
+  background: var(--vela-rail) !important;
+  border-right: 1px solid var(--vela-border) !important;
+  transition: margin-left var(--vela-slow) var(--vela-ease), opacity var(--vela-slow) ease;
+}
+:root[vela-rail-hidden] #navigator-toolbox {
+  margin-left: calc(-1 * var(--vela-rail-width) - 1px) !important;
+  opacity: 0;
+  pointer-events: none;
+}
+/* Zen's own tab list and buttons stay in the document for shortcuts, sessions and add-ons, out of sight. */
+:root[vela] #navigator-toolbox > #titlebar {
+  visibility: collapse !important;
+}
+
+#vela-rail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  padding: 12px 0 12px;
+  gap: 6px;
+}
+.vela-rail-button {
+  position: relative;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  border-radius: 12px !important;
+}
+.vela-rail-button > .toolbarbutton-icon { width: 24px !important; height: 24px !important; }
+.vela-rail-button[aria-current="true"] { color: var(--vela-accent); }
+#vela-rail-home { list-style-image: url("vela-icons/home.svg"); }
+#vela-rail-bookmarks { list-style-image: url("vela-icons/bookmarks.svg"); }
+#vela-rail-history { list-style-image: url("vela-icons/history.svg"); }
+#vela-rail-downloads { list-style-image: url("vela-icons/downloads.svg"); }
+#vela-rail-extensions { list-style-image: url("vela-icons/extensions.svg"); }
+#vela-rail-settings { list-style-image: url("vela-icons/settings.svg"); }
+
+/* One highlight that slides to the current place, with the accent's bar on the rail's edge. */
+#vela-rail-light {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--vela-accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vela-accent) 24%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(var(--vela-light-y, 0));
+}
+#vela-rail-light::before {
+  content: "";
+  position: absolute;
+  left: -8px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--vela-accent);
+}
+#vela-rail[vela-lit] #vela-rail-light { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  #vela-rail[vela-ready] #vela-rail-light {
+    transition: transform var(--vela-slow) var(--vela-spring), opacity var(--vela-fast) ease;
+  }
+  .vela-rail-button > .toolbarbutton-icon { transition: transform var(--vela-fast) var(--vela-ease); }
+  .vela-rail-button:hover:active > .toolbarbutton-icon { transform: scale(.88); }
+}
+#vela-rail-spacer { flex: 1; }
+#vela-rail-separator {
+  width: 32px;
+  min-height: 1px;
+  height: 1px;
+  margin: 4px 0;
+  background: var(--vela-border);
+}
+
+/* ---------- Bookmarks and History panel (Firefox's sidebar) ---------- */
+
+:root[vela] #sidebar-box {
+  background: var(--vela-toolbar) !important;
+  color: var(--vela-text) !important;
+  border-inline-end: 1px solid var(--vela-border) !important;
+  --sidebar-background-color: var(--vela-toolbar);
+  --sidebar-text-color: var(--vela-text);
+}
+:root[vela] #sidebar-header {
+  border-bottom: 1px solid var(--vela-border) !important;
+  padding: 8px 10px !important;
+}
+:root[vela] #sidebar-splitter {
+  border: 0 !important;
+  width: 1px !important;
+  background: var(--vela-border) !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root[vela] #sidebar-box:not([hidden]) { animation: vela-panel-in var(--vela-slow) var(--vela-ease); }
+}
+@keyframes vela-panel-in { from { opacity: 0; transform: translateX(-12px); } }
+
+/* ---------- All tabs (the grid button) ---------- */
+
+#vela-all-tabs {
+  --panel-padding: 6px;
+}
+#vela-all-tabs-list {
+  min-width: 320px;
+  max-width: 420px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 2px;
+}
+.vela-all-tabs-row {
+  border-radius: 8px;
+}
+.vela-all-tabs-row[selected] {
+  background: var(--vela-accent-soft);
+}
+.vela-all-tabs-row:hover:not([selected]) {
+  background: var(--vela-hover);
+}
+.vela-all-tabs-open {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+  background: transparent !important;
+}
+.vela-all-tabs-open > .toolbarbutton-icon,
+.vela-all-tabs-new > .toolbarbutton-icon {
+  width: 16px;
+  height: 16px;
+  -moz-context-properties: fill;
+  fill: currentColor;
+}
+.vela-all-tabs-close {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  margin-inline-end: 4px !important;
+  list-style-image: url("vela-icons/close.svg");
+  opacity: 0;
+}
+.vela-all-tabs-close > .toolbarbutton-icon { width: 16px !important; height: 16px !important; }
+.vela-all-tabs-row:is(:hover, [selected]) .vela-all-tabs-close,
+.vela-all-tabs-close:focus-visible { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  .vela-all-tabs-row { animation: vela-row-in 220ms var(--vela-ease) both; }
+  .vela-all-tabs-row:nth-child(2) { animation-delay: 20ms; }
+  .vela-all-tabs-row:nth-child(3) { animation-delay: 40ms; }
+  .vela-all-tabs-row:nth-child(4) { animation-delay: 60ms; }
+  .vela-all-tabs-row:nth-child(n + 5) { animation-delay: 80ms; }
+}
+@keyframes vela-row-in { from { opacity: 0; transform: translateY(-4px); } }
+
+/* ---------- Panels and menus ---------- */
+
+:root[vela] panel,
+:root[vela] menupopup {
+  --panel-border-radius: 12px !important;
+  --panel-background: var(--vela-toolbar) !important;
+  --panel-color: var(--vela-text) !important;
+  --panel-border-color: var(--vela-border) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #vela-tabstrip *, #vela-rail *, :root[vela] #navigator-toolbox { transition: none !important; animation: none !important; }
+}

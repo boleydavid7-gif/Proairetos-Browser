@@ -1,88 +1,114 @@
 #!/usr/bin/env node
-/* Static checks for the Vela port of Claude's ProairetOS Browser design.
+/* Static checks for Vela's browser window, new tab page, branding and settings.
  * Run: node scripts/check-vela-port.mjs
- * A graphical Zen/Firefox smoke test is still required.
+ * To see the result, run scripts/vela-preview.sh (a real Zen release with Vela put in, as the build does).
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Script } from 'node:vm';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
 
 const root = resolve(import.meta.dirname, '..');
 const read = file => readFileSync(resolve(root, file), 'utf8');
 const browser = read('scripts/vela-native.js');
 const chrome = read('scripts/vela-chrome.css');
 const mods = read('scripts/vela-curated-mods.css');
+const home = read('scripts/vela-home.css');
 const notices = read('scripts/VELA_MODS_NOTICES.md');
 const brand = read('scripts/apply-vela-branding.sh');
 const brandLocale = read('scripts/brand-vela-ui.py');
-const home = read('scripts/lamplight-home.css');
 const installer = read('scripts/apply-vela-native.sh');
-const preview = read('scripts/preview-lamplight-home.sh');
+const preview = read('scripts/vela-preview.sh');
+const velaPrefs = read('prefs/zen/vela.yaml');
 
+// The window script parses, and keeps Firefox's tabs where Zen keeps them.
 new Script(browser, { filename: 'scripts/vela-native.js' });
-assert.ok(browser.includes('toolbox.append(rail)'), 'tools must stay in the existing Zen sidebar');
-assert.ok(browser.includes('zen.tabs.vertical.right-side'), 'Vela must use Zen native right-hand positioning');
-assert.ok(preview.includes('user_pref("zen.tabs.vertical.right-side", true)'),
-  'Vela preview profile must position tools on right before startup');
-assert.ok(chrome.includes('#zen-browser-tabs-container') &&
-  chrome.includes('#tabbrowser-tabs') &&
-  chrome.includes('display: none !important'),
-  'hide Zen vertical tabs without deleting their actual DOM');
-assert.ok(chrome.includes('#navigator-toolbox #vela-native-rail'),
-  'Vela tools must remain in right Zen toolbox');
-assert.ok(chrome.includes('#vela-top-tabs'), 'horizontal top tabs must remain visible');
-assert.ok(!browser.includes('sidebarHost.insertBefore(rail'), 'do not reintroduce the second sidebar');
-assert.ok(!browser.includes('strip.append(tabBrowser)'), 'never move Firefox’s native tab container');
-assert.ok(browser.includes('const continueTabs'), 'continue area is in privileged chrome');
-assert.ok(browser.includes('document.createElementNS("http://www.w3.org/1999/xhtml", "input")'),
-  'pin editor must use real HTML inputs inside browser.xhtml');
-assert.ok(browser.includes('normalizedSite'), 'pinned website URLs must be validated');
-assert.ok(browser.includes('aria-current'), 'navigation selection state must be exposed');
+assert.ok(!/tabbrowser-tabs[^\n]*\.(append|prepend|before|after|moveBefore)\(/.test(browser),
+  'never move Firefox\'s tab container; the tab row shows gBrowser\'s tabs');
+assert.ok(browser.includes('gBrowser.selectedTab = tab') && browser.includes('removeTab(tab'),
+  'the tab row selects and closes real tabs');
+assert.ok(browser.includes('moveTabTo'), 'dragging moves real tabs');
+assert.ok(browser.includes('tabContextMenu'), 'right-click opens Firefox\'s own tab menu');
+assert.ok(!browser.includes('zen.tabs.vertical.right-side'), 'Vela does not force Zen\'s sidebar to the right');
+assert.ok(!browser.includes('PathUtils.homeDir'), 'PathUtils.homeDir does not exist in this Firefox');
+assert.ok(browser.includes('Services.dirsvc.get("Home"'), 'the ProairetOS palette is found through the home folder');
+assert.ok(browser.includes('vela.theme.colors') && chrome.includes('[vela-colors="system"]'),
+  'Vela colors and system colors');
+assert.ok(chrome.includes('AccentColor') && chrome.includes('Canvas'), 'system colors use the system\'s own colors');
+assert.ok(home.includes('-moz-pref("vela.theme.colors", "system")'), 'the new tab page follows the color choice');
+assert.ok(chrome.includes('prefers-reduced-motion'), 'motion respects reduced motion');
+assert.ok(browser.includes('TRUSTED_ICON'), 'only favicons Firefox resolved are shown in the window');
 
-for (const id of ['vela-sidebar-heading', 'vela-add-site-form', 'vela-continue-tabs',
-  'vela-tab-favicon', 'vela-top-tabs']) {
-  assert.ok(chrome.includes(id), `missing Vela chrome selector: ${id}`);
+// Every icon the styles or the script name is packaged.
+const icons = new Set(readdirSync(resolve(root, 'scripts/vela-icons')));
+const named = new Set([
+  ...[...chrome.matchAll(/url\("vela-icons\/([^"]+)"\)/g)].map(m => m[1]),
+  ...[...browser.matchAll(/chrome:\/\/browser\/content\/vela-icons\/([^"]+)"/g)].map(m => m[1]),
+]);
+for (const icon of named) assert.ok(icons.has(icon), `missing icon: scripts/vela-icons/${icon}`);
+assert.ok(chrome.includes('url("vela-logo.svg")') && existsSync(resolve(root, 'scripts/vela.svg')), 'logo');
+assert.ok(chrome.includes('url("fonts/eb-garamond-500.woff2")') && existsSync(resolve(root, 'scripts/fonts/eb-garamond-500.woff2')),
+  'the wordmark\'s serif');
+assert.ok(existsSync(resolve(root, 'scripts/fonts/OFL-EB-Garamond.txt')), 'the font\'s license travels with it');
+
+// The new tab page: its content rules allow images but no web fonts, so the serif is a drawing.
+assert.ok(!/@font-face/.test(home), 'the new tab page cannot load web fonts');
+const built = resolve(tmpdir(), 'vela-home-check.css');
+execFileSync('python3', [resolve(root, 'scripts/build-vela-home.py'), built], { stdio: 'inherit' });
+assert.ok(!readFileSync(built, 'utf8').includes('@VELA_'), 'every placeholder in vela-home.css is filled');
+
+// Packaging into the build, and the preview doing the same.
+for (const text of [installer, preview]) {
+  assert.ok(text.includes('vela-styles.css') && text.includes('vela-native.js') && text.includes('vela-icons'),
+    'stylesheet, script and icons are packaged under chrome://browser/content/');
+  assert.ok(text.includes('browser-main') && text.includes('activity-stream.css'), 'browser.xhtml and the new tab sheet');
 }
-for (const name of ['vela.svg', 'vela-dawn.svg', 'vela-dusk.svg']) {
-  assert.ok(existsSync(resolve(root, 'scripts', name)), `missing art: ${name}`);
-  if (name !== 'vela.svg') assert.ok(home.includes(name) && preview.includes(name),
-    `homepage art not wired into the preview: ${name}`);
+assert.ok(installer.includes('vela-home begin'), 'the new tab sheet is replaced, not added again, on a second run');
+assert.ok(installer.includes('vela-curated-mods.css'), 'curated mods are embedded with the base stylesheet');
+
+// Settings the layout depends on.
+const pref = (file, name) => read(file).match(new RegExp(`- name: ${name.replaceAll('.', '\\.')}\\n(?:  \\w+: .*\\n)*?  value: (.*)`))?.[1];
+assert.equal(pref('prefs/zen/view.yaml', 'zen.view.use-single-toolbar'), 'false', 'two-row window');
+assert.equal(pref('prefs/zen/view.yaml', 'zen.view.sidebar-expanded'), 'false', 'narrow sidebar for the rail');
+assert.equal(pref('prefs/zen/view.yaml', 'zen.view.show-newtab-button-top'), 'false', 'new tabs at the end of the row');
+assert.equal(pref('prefs/zen/zen-urlbar.yaml', 'zen.urlbar.replace-newtab'), 'false', 'the new tab page, not a floating bar');
+assert.equal(pref('prefs/zen/zen-urlbar.yaml', 'zen.urlbar.behavior'), 'normal', 'the address field stays in the toolbar');
+assert.equal(pref('prefs/zen/welcome.yaml', 'zen.welcome-screen.seen'), 'true', 'Zen\'s welcome is skipped');
+assert.equal(pref('prefs/firefox/newtab.yaml', 'browser.newtabpage.activity-stream.feeds.topsites'), 'true', 'shortcut tiles');
+for (const name of ['vela.theme.colors', 'vela.rail.hidden', 'vela.mods.findbar', 'vela.mods.urlbar', 'vela.mods.menus',
+  'browser.newtabpage.pinned', 'browser.topsites.useRemoteSetting']) {
+  assert.ok(velaPrefs.includes(`- name: ${name}\n`), `missing setting ${name}`);
 }
-assert.ok(browser.includes('vela.mods.findbar') &&
-  browser.includes('vela.mods.urlbar') && browser.includes('vela.mods.menus'),
-  'bundled Zen-inspired mod preferences must exist');
-for (const [preference, className] of [
-  ['findbar', 'vela-mod-findbar'], ['urlbar', 'vela-mod-urlbar'], ['menus', 'vela-mod-menus']
-]) {
+JSON.parse(velaPrefs.match(/- name: browser\.newtabpage\.pinned\n  value: '(.*)'/)[1]);
+
+// Built-in mods and their notices.
+for (const [preference, attribute] of [['findbar', 'vela-mod-findbar'], ['urlbar', 'vela-mod-urlbar'], ['menus', 'vela-mod-menus']]) {
   assert.ok(browser.includes('vela.mods.' + preference), 'missing mod preference ' + preference);
-  assert.ok(mods.includes('[' + className + '="true"]'), 'missing mod CSS class ' + className);
+  assert.ok(mods.includes('[' + attribute + '="true"]'), 'missing mod CSS ' + attribute);
 }
-assert.ok(installer.includes('vela-styles.css') &&
-  installer.includes('vela-curated-mods.css') &&
-  installer.includes('chrome://browser/content/vela-styles.css'),
-  'curated mods and base CSS must be embedded as one stylesheet in Firefox chrome');
-assert.ok(preview.includes('rm -f "$profile/chrome/userChrome.css"'),
-  'preview must not double-load browser chrome styles');
+assert.ok(notices.includes('RobotoSkunk') && notices.includes('matteo-tafuro') &&
+  notices.includes('KiKaraage') && notices.includes('MIT License'),
+  'upstream community mod attributions and permission notices must be preserved');
+
+// Branding.
+const surfer = JSON.parse(read('surfer.json'));
+for (const [kind, brandInfo] of Object.entries(surfer.brands)) {
+  for (const key of ['brandShorterName', 'brandShortName', 'brandFullName']) {
+    assert.ok(!/\bZen\b/.test(brandInfo[key]), `${kind} ${key} still says Zen`);
+  }
+}
 assert.ok(brand.includes('python3 scripts/brand-vela-ui.py') &&
   brandLocale.includes('ZEN_BROWSER') && brandLocale.includes('convert_locale'),
   'brand visible Zen UI strings as Vela without replacing engine identifiers');
 assert.ok(brandLocale.includes('restore_damaged_locale') &&
-  brandLocale.includes('result.count("\\n")') &&
-  brandLocale.includes('MERGED_FTL_KEYS'),
+  brandLocale.includes('result.count("\\n")') && brandLocale.includes('MERGED_FTL_KEYS'),
   'branding must preserve translation newlines and recover old corrupt settings');
-execFileSync('python3', ['scripts/test-brand-vela-ui.py'], {
-  cwd: root, stdio: 'inherit',
-});
-assert.ok(notices.includes('RobotoSkunk') && notices.includes('matteo-tafuro') &&
-  notices.includes('KiKaraage') && notices.includes('MIT License'),
-  'upstream community mod attributions and permission notices must be preserved');
-for (const [name, cssText] of [['browser', chrome], ['mods', mods]]) {
-  const braces = [...cssText.matchAll(/[{}]/g)].reduce(
-    (n, match) => n + (match[0] === '{' ? 1 : -1), 0);
+execFileSync('python3', ['scripts/test-brand-vela-ui.py'], { cwd: root, stdio: 'inherit' });
+
+for (const [name, cssText] of [['browser', chrome], ['mods', mods], ['home', home]]) {
+  const braces = [...cssText.matchAll(/[{}]/g)].reduce((n, match) => n + (match[0] === '{' ? 1 : -1), 0);
   assert.equal(braces, 0, name + ' CSS brace balance');
 }
-assert.ok(installer.includes('vela-logo.svg'), 'Vela logo must be packaged into Firefox chrome');
-assert.ok(installer.includes('content/browser/'), 'Firefox jar manifest must include Vela assets');
-console.log('Vela port static checks passed. Test real tab/sidebar behavior in Zen on Ubuntu.');
+console.log('Vela checks passed. scripts/vela-preview.sh shows the result in a real Zen release.');

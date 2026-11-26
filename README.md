@@ -1,82 +1,109 @@
-# Vela — ProairetOS Browser
+# Vela, the ProairetOS browser
 
-**Vela** is the web browser developed for **ProairetOS**. Its engine is derived
-from [Zen Browser](https://github.com/zen-browser/desktop), built on
-[Mozilla Firefox](https://www.mozilla.org/firefox/). The user-facing browser
-identity is **Vela**, with ProairetOS Lamplight styling.
+**Vela** is the web browser of **ProairetOS**. Its engine is derived from
+[Zen Browser](https://github.com/zen-browser/desktop), which is built on
+[Mozilla Firefox](https://www.mozilla.org/firefox/). People see Vela: its name, logo, window and new tab page.
 
-## The experience
+![Vela, dark](docs/vela/vela-dark.png)
 
-- A restrained, opaque, Windows 11–inspired interface that tracks the
-  currently active ProairetOS Lamplight colors.
-- Tabs across the **top**; the right sidebar is for Home, Bookmarks, History,
-  Downloads, pinned websites and Continue.
-- Branded Vela icon and localized UI naming, with a light/dark homepage.
-- Three built-in, CSS-only community-inspired refinements: Find Bar, URL Bar
-  and context menus, shipped as part of the browser rather than extensions.
-- Real Firefox tabs, session restoration, shortcuts, browsing engine,
-  permissions and extensions remain intact.
+## The window
 
-The interface changes are implemented as a narrowly scoped browser-chrome
-integration, not an injection into websites. The Firefox/Zen internals retain
-their original identifiers where required for compatibility.
+- **Tab row** across the top. The selected tab joins the toolbar under it; on the new tab page it reads
+  "Vela by ProairetOS". Tabs grow in when opened and shrink out when closed. You can drag them to reorder,
+  middle-click to close, and move between them with the arrow keys. Right-clicking a tab opens Firefox's own tab
+  menu. These are Firefox's real tabs: session restore, shortcuts and extensions work as before.
+- **Toolbar**: the grid button lists every open tab, then back, forward and reload, a rounded address field with
+  the bookmark star, the Vela button and the menu.
+- **Sidebar rail**: Home, Bookmarks, History, Downloads and Extensions, with Settings at the foot. A highlight
+  slides to the current place. The chevron at the top left hides or shows the rail.
+- **New tab page**: the Vela logo and wordmark, a search field, and shortcut tiles (YouTube, GitHub, Microsoft,
+  Wikipedia, Reddit, Add). The page's parts come in one after another.
+- **Colors**: the Vela button's menu offers **Vela colors** (charcoal and gold in dark, cream and gold in light)
+  or **Match system colors** (the system's light or dark scheme and accent color). In the ProairetOS session,
+  Match system colors uses the session's Lamplight palette.
+- **Built-in refinements**: three CSS-only community-inspired refinements for the Find bar, the address bar's
+  results and menus, shipped as part of the browser rather than as extensions.
 
-## Build and preview on Ubuntu
+Light: [docs/vela/vela-light.png](docs/vela/vela-light.png). Match system colors: [docs/vela/vela-system-colors.png](docs/vela/vela-system-colors.png).
 
-This repository expects the Zen/Firefox engine checkout in `engine/` and its
-build dependencies installed. On the `proairetos` branch:
+The changes are browser-window code (`browser.xhtml`) and stylesheets, never scripts injected into websites.
+
+## Where it lives
+
+| File | What it is |
+| --- | --- |
+| `scripts/vela-native.js` | The tab row, the rail, the grid and Vela buttons, the color choice |
+| `scripts/vela-chrome.css` | The window's look: palette, tab row, toolbar, rail, panels, motion |
+| `scripts/vela-curated-mods.css` | The three refinements (each can be turned off, below) |
+| `scripts/vela-home.css` | The new tab page; `build-vela-home.py` puts the logo and wordmark inside it |
+| `scripts/vela.svg`, `vela-wordmark.svg`, `vela-icons/` | Logo, wordmark (drawn by `make-vela-wordmark.py`), line icons |
+| `scripts/fonts/` | EB Garamond for the wordmark (SIL Open Font License, `OFL-EB-Garamond.txt`) |
+| `prefs/zen/vela.yaml` | Vela's settings and the new tab shortcuts |
+| `configs/branding/` | App icons and About-window art |
+
+Vela's layout depends on these Zen settings, which are set in place in `prefs/`: `zen.view.use-single-toolbar` and
+`zen.view.sidebar-expanded` off (the two-row window with a narrow sidebar), `zen.view.show-newtab-button-top` off
+(new tabs open at the end of the row), `zen.urlbar.replace-newtab` off (the new tab page, not a floating address
+bar), `zen.urlbar.behavior` normal, and `zen.welcome-screen.seen` on (Zen's own first-run welcome is skipped).
+
+## See it without building
 
 ```bash
-git pull --ff-only origin proairetos
-node scripts/check-vela-port.mjs
-bash scripts/apply-vela-native.sh
-bash scripts/preview-lamplight-home.sh
+scripts/vela-preview.sh                  # on this screen
+scripts/vela-preview.sh --shot out.png   # on a virtual screen, saving a picture
 ```
 
-`apply-vela-native.sh` installs the Vela browser-chrome JavaScript,
-the logo, and the combined base + curated-mod CSS stylesheet. It applies
-branding and invokes `mach build faster -j2` through the branding script.
-The preview uses the freshly built local browser executable and a dedicated
-Vela test profile.
+The preview downloads the official Zen release Vela is based on (1.24.3b; `ZEN_VERSION` picks another) into
+`.vela-preview/`. It puts Vela into a copy of that release's app archive the way the build does, and starts it with
+Vela's settings in its own profile. Use it to check a change to the look in seconds; the full build is still the
+real thing.
 
-The preview profile enables custom styling for the home page. Native browser
-chrome styling is already bundled into the build and is **not** loaded again
-as a profile-level `userChrome.css`.
+## Build on Ubuntu
 
-## Optional mod controls
+This repository expects the Zen/Firefox engine checkout in `engine/` and its build dependencies (and
+`librsvg2-bin` for the icons). On the `proairetos` branch:
 
-Open `about:config` to disable the bundled refinements individually:
+```bash
+npm run init                     # first time: download and import the engine
+node scripts/check-vela-port.mjs
+bash scripts/apply-vela-native.sh
+bash scripts/install-vela-launcher.sh   # optional: Vela in the application menu
+```
+
+`apply-vela-native.sh` links Vela's stylesheet and script into `browser.xhtml`, packages them with the logo, icons
+and font, and adds the new tab stylesheet. It then brands the build (`apply-vela-branding.sh`) and runs
+`mach build faster`. It is safe to run again. `package-proairetos-dev.sh` makes a development `.deb`.
+
+## Settings
+
+Open `about:config`:
 
 | Preference | What it controls | Default |
 | --- | --- | --- |
-| `vela.mods.findbar` | Fluent find-in-page surface | `true` |
-| `vela.mods.urlbar` | Rounded Lamplight address bar | `true` |
-| `vela.mods.menus` | Native menu styling | `true` |
+| `vela.theme.colors` | `vela` or `system` (also in the Vela button's menu) | `vela` |
+| `vela.rail.hidden` | The sidebar rail hidden (also the chevron at the top left) | `false` |
+| `vela.mods.findbar` | Find-in-page refinement | `true` |
+| `vela.mods.urlbar` | Address bar results refinement | `true` |
+| `vela.mods.menus` | Menu refinement | `true` |
 
-The mods don't change Vela's top tab bar or right navigation pane.
-Source inspiration and MIT attributions: [VELA_MODS_NOTICES.md](scripts/VELA_MODS_NOTICES.md).
+Source inspiration and MIT attributions for the refinements: [VELA_MODS_NOTICES.md](scripts/VELA_MODS_NOTICES.md).
 
-## Branding: Vela vs. Zen
+## Branding: Vela and Zen
 
-The product title, logo and English user-visible strings are branded **Vela**
-by `scripts/apply-vela-branding.sh` and `scripts/brand-vela-ui.py`.
-This includes Firefox Fluent locale strings and desktop launcher labels
-where present in the engine checkout.
+The product name, logo, icons and English user-visible strings are **Vela**: `surfer.json` (all build kinds),
+`configs/branding/`, and `scripts/brand-vela-ui.py`. That script rewrites Firefox and Zen's English strings while
+keeping keys, placeholders, line endings and URLs, and repairs translation files an older version of it damaged.
 
-Internal engine preferences (such as `zen.tabs.vertical.right-side`),
-code identifiers, file paths, the currently named `zen` executable and
-upstream links retain their original spelling to avoid breaking browser
-behavior. The locale script intentionally doesn't attempt to rewrite source
-code or legal text; translations beyond English may retain upstream labels.
+Names people don't see keep their upstream spelling, so profiles, updates from upstream and extensions keep
+working. These include preference names such as `zen.view.*`, code identifiers, file paths, the `zen` executable
+name and window class. Languages other than English may still show upstream labels.
 
 ## Licenses and upstream attribution
 
-Vela is a fork of **Zen Browser**; Zen Browser is based on **Mozilla Firefox**.
-All upstream authors retain credit for their work and applicable license
-notices, including the Mozilla Public License 2.0, remain in effect.
-Rebranding the browser does not change those licenses or make the engine
-original to Vela. See the bundled license files and
-[mod notices](scripts/VELA_MODS_NOTICES.md).
+Vela is a fork of **Zen Browser**; Zen Browser is based on **Mozilla Firefox**. All upstream authors keep credit
+for their work, and their licenses, including the Mozilla Public License 2.0, remain in effect. Rebranding the
+browser does not change those licenses or make the engine original to Vela. EB Garamond is under the SIL Open Font
+License 1.1. See the bundled license files and the [mod notices](scripts/VELA_MODS_NOTICES.md).
 
-Changes are developed on the `proairetos` branch. The upstream names in
-this README are attribution, not user-facing product branding.
+Changes are developed on the `proairetos` branch. The upstream names in this README are attribution, not product
+branding.

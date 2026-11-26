@@ -1,0 +1,46 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# Vela's own settings (scripts/vela-native.js reads them) and the new tab page's shortcuts.
+# Zen settings Vela's layout depends on are set in place, in their own files:
+#   view.yaml: zen.view.use-single-toolbar false, zen.view.sidebar-expanded false, zen.view.show-newtab-button-top false
+#   zen-urlbar.yaml: zen.urlbar.behavior normal; welcome.yaml: zen.welcome-screen.seen true
+#   ../firefox/newtab.yaml: browser.newtabpage.activity-stream.feeds.topsites true
+
+# "vela" (the Vela palette, light and dark) or "system" (the system's scheme and accent; in the ProairetOS session,
+# its Lamplight palette). Chosen from the Vela button's menu.
+- name: vela.theme.colors
+  value: "vela"
+
+- name: vela.rail.hidden
+  value: false
+
+- name: vela.mods.findbar
+  value: true
+
+- name: vela.mods.urlbar
+  value: true
+
+- name: vela.mods.menus
+  value: true
+
+# Shortcut tiles on the new tab page, named as people know them. Firefox's own list (from Remote Settings) is off,
+# so these are the starting set; people add, remove and edit their own from the page.
+- name: browser.topsites.useRemoteSetting
+  value: false
+
+- name: browser.newtabpage.activity-stream.default.sites
+  value: "https://www.youtube.com/,https://github.com/,https://www.microsoft.com/,https://www.wikipedia.org/,https://www.reddit.com/"
+
+- name: browser.newtabpage.pinned
+  value: '[{"url":"https://www.youtube.com/","label":"YouTube"},{"url":"https://github.com/","label":"GitHub"},{"url":"https://www.microsoft.com/","label":"Microsoft"},{"url":"https://www.wikipedia.org/","label":"Wikipedia"},{"url":"https://www.reddit.com/","label":"Reddit"}]'
+
+- name: browser.newtabpage.activity-stream.topSitesRows
+  value: 1
+
+- name: browser.newtabpage.activity-stream.showSponsoredTopSites
+  value: false
+
+- name: browser.newtabpage.activity-stream.showSponsored
+  value: false

@@ -56,16 +56,9 @@
 }
 
 /* 2. Better Cleaned URL Bar, adapted without glass or page-color sampling:
- * restrained radius, solid Mica-like tonal surfaces and Lamplight selection. */
-:root[vela-mod-urlbar="true"] #urlbar .urlbar-background {
-  border-radius: 11px !important;
-  border: 1px solid var(--lamplight-border) !important;
-  background: var(--lamplight-raised) !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-}
+ * solid tonal results and Lamplight selection. The resting field's pill is in vela-chrome.css. */
 :root[vela-mod-urlbar="true"] #urlbar[breakout-extend] .urlbar-background {
-  border-radius: 13px !important;
+  border-radius: 20px !important;
   background: var(--lamplight-surface) !important;
   border-color: var(--lamplight-border) !important;
   box-shadow: 0 12px 32px rgba(0,0,0,.20) !important;

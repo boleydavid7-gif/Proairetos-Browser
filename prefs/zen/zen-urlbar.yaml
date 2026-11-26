@@ -2,8 +2,9 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+# Vela shows its new tab page (logo, search, shortcuts) instead of Zen's floating address bar.
 - name: zen.urlbar.replace-newtab
-  value: true
+  value: false
 
 - name: zen.urlbar.show-protections-icon
   value: false
@@ -12,7 +13,7 @@
   value: false
 
 - name: zen.urlbar.behavior
-  value: floating-on-type
+  value: normal
 
 - name: zen.urlbar.wait-to-clear
   value: 45000

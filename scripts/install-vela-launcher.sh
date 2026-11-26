@@ -10,7 +10,9 @@ install -m644 scripts/vela.svg "$data/icons/hicolor/scalable/apps/vela-browser.s
 python3 - "$root" "$bin/vela-browser" "$data/applications/zen-unofficial.desktop" <<'PY'
 import pathlib,shlex,sys
 root,wrapper,desktop=map(pathlib.Path,sys.argv[1:])
-wrapper.write_text("#!/bin/bash\nset -euo pipefail\ncd "+shlex.quote(str(root))+"\nexec bash scripts/preview-lamplight-home.sh \"$@\"\n")
+# The locally built browser, in a profile of its own (Vela's look and settings are compiled in).
+profile=pathlib.Path.home()/".local/share/vela/profile"
+wrapper.write_text("#!/bin/bash\nset -euo pipefail\nmkdir -p "+shlex.quote(str(profile))+"\nexec "+shlex.quote(str(root/"engine/obj-x86_64-pc-linux-gnu/dist/bin/zen"))+" --profile "+shlex.quote(str(profile))+" \"$@\"\n")
 wrapper.chmod(0o755)
 # Desktop Entry Exec quoting is independent of shell quoting.
 exe=str(wrapper).replace("\\","\\\\").replace('"','\\"').replace('$','\\$').replace('`','\\`')

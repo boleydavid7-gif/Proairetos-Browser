@@ -14,10 +14,10 @@
   condition: "defined(XP_MACOSX)"
 
 - name: zen.view.use-single-toolbar
-  value: true
+  value: false
 
 - name: zen.view.sidebar-expanded
-  value: true
+  value: false
 
 - name: zen.view.experimental-force-window-controls-left
   value: false
@@ -35,7 +35,7 @@
   type: static
 
 - name: zen.view.show-newtab-button-top
-  value: true
+  value: false
 
 - name: zen.view.show-scroll-to-selected-tab
   value: true
