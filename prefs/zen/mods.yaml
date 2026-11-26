@@ -7,8 +7,10 @@
 
 # === Mark: Site Injection ===
 
+# Vela: Zen's mods store may not install mods into Vela (they are made for Zen's layout); Vela's own
+# refinements are built in. Mod files can still be imported in Settings.
 - name: zen.injections.match-urls
-  value: "https://zen-browser.app/*"
+  value: "https://mods.vela.invalid/*"
   locked: true
   condition: "defined(MOZILLA_OFFICIAL)"
 

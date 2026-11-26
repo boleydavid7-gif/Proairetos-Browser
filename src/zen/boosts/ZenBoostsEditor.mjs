@@ -126,6 +126,8 @@ export class nsZenBoostEditor {
       .addEventListener("click", this.onCodeButtonPressed.bind(this));
     const shareButton = this.doc.getElementById("zen-boost-share");
     shareButton.addEventListener("click", this.onShareBoostPressed.bind(this));
+    // Vela: sharing a boost uploads it to the share server, offered only with zen.share.enabled.
+    shareButton.hidden = !Services.prefs.getBoolPref("zen.share.enabled", true);
     this.doc
       .getElementById("zen-boost-back")
       .addEventListener("click", this.onCodeBackButtonPressed.bind(this));

@@ -97,6 +97,13 @@ through the ProairetOS update or apt, so Linux builds have no updater of their o
 this repository's releases. A Windows or macOS build would need Vela's own signed update files and an update feed
 before it updates itself.
 
+## Zen's online services
+
+Vela talks to no Zen server unless you choose to. **Sharing** spaces, folders, split views and boosts would upload them
+to Zen's share server, so it is off (`zen.share.enabled`), and its address never resolves. **Zen's mods store** may not
+install mods into Vela, because they are made for Zen's layout; Vela's own refinements are built in. A mod file can
+still be imported in Settings.
+
 ## Branding: Vela and Zen
 
 The product name, logo, icons and English user-visible strings are **Vela**: `surfer.json` (all build kinds),

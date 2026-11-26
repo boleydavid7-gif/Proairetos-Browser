@@ -104,6 +104,15 @@ assert.ok(!JSON.stringify(surfer).includes('zen-browser.app'), 'no Vela build ma
 assert.ok(surfer.updateHostname.endsWith('.invalid'), 'the update address never resolves');
 assert.ok(read('configs/linux/mozconfig').includes('--disable-updater'), 'Linux builds have no updater of their own');
 assert.ok(!read('configs/common/mozconfig').includes('zen-browser/desktop'), 'the build names Vela\'s source repository');
+// Sharing and the mods store do not reach Zen's servers.
+for (const file of ['prefs/zen/share.yaml', 'prefs/zen/mods.yaml', 'src/build/moz-build.patch',
+  'src/browser/components/preferences/zenMarketplace.inc.xhtml']) {
+  assert.ok(!/^[^#\n]*zen-browser\.app/m.test(read(file).split('\n').filter(l => !l.startsWith('-')).join('\n')),
+    `${file} still points at a Zen server`);
+}
+assert.equal(pref('prefs/zen/share.yaml', 'zen.share.enabled'), 'false', 'sharing is off');
+assert.ok(read('src/zen/share/ZenShareManager.mjs').includes('"zen.share.enabled"'), 'sharing checks its switch');
+assert.ok(read('src/zen/boosts/ZenBoostsEditor.mjs').includes('"zen.share.enabled"'), 'boost sharing checks its switch');
 assert.ok(brand.includes('python3 scripts/brand-vela-ui.py') &&
   brandLocale.includes('ZEN_BROWSER') && brandLocale.includes('convert_locale'),
   'brand visible Zen UI strings as Vela without replacing engine identifiers');

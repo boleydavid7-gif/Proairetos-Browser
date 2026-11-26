@@ -46,7 +46,11 @@ class nsZenShareManager extends nsZenDOMOperatedFeature {
   }
 
   get enabled() {
-    return !gZenWorkspaces.privateWindowOrDisabled;
+    // Vela: sharing uploads to a share server; zen.share.enabled (off in Vela) decides whether it is offered.
+    return (
+      Services.prefs.getBoolPref("zen.share.enabled", true) &&
+      !gZenWorkspaces.privateWindowOrDisabled
+    );
   }
 
   // Mark: sharing
